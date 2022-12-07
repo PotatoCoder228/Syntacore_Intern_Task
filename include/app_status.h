@@ -5,14 +5,15 @@
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_APP_STATUS_H
 #define SYNTACORE_TOOLS_INTERN_TASK_APP_STATUS_H
 
-enum reading_status{
-    READ_OK = 10,
-    READ_ERROR = 11
-};
-
-enum writing_status{
-    WRITE_OK = 100,
-    WRITE_ERROR = 101
+enum file_actions_status{
+    FILE_OPEN_OK = 0,
+    FILE_OPEN_ERROR = 1,
+    FILE_CLOSE_OK = 2,
+    FILE_CLOSE_ERROR = 3,
+    FILE_READ_OK = 4,
+    FILE_READ_ERROR = 5,
+    FILE_WRITE_OK = 6,
+    FILE_WRITE_ERROR = 7
 };
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_APP_STATUS_H
