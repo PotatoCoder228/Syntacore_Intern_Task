@@ -22,11 +22,11 @@ int read_command(char* buffer, size_t string_size){
     return 0;
 }
 
-int call_main_console(){
+int console_start(){
     int8_t is_work = 1;
+    printf("\nПриветствую, мастер Йода!\n");
     while(is_work){
         char* string[5] = {0};
-        printf("\nПриветствую, мастер Йода!\n");
         read_command(string, 5);
         printf("%s", string);
     }

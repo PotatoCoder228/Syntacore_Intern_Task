@@ -5,6 +5,6 @@
 #include "../../include/io_stream_handler.h"
 
 int app_start(){
-    call_main_console();
+    console_start();
     return 0;
 }

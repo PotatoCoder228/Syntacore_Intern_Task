@@ -2,36 +2,105 @@
 // Created by potato_coder on 07.12.22.
 //
 
-#include "singly_linked_list.h"
 
-singly_linked_node *singly_linked_node_constructor() {
-    singly_linked_node *node = malloc(sizeof(void *));
-    return node;
-}
+//TODO доделать все методы и перепроверить всё!!!
+#include "../../include/singly_linked_list.h"
 
-singly_linked_node *singly_linked_list_get_last(singly_linked_node *node, singly_linked_node *prev_node) {
-    if (node != NULL) {
-        prev_node = node;
-        node = node->next;
-        return singly_linked_list_get_last(node, prev_node);
+linked_list *linked_list_node_constructor() {
+    linked_list *list = malloc(sizeof(void *));
+    if(list != NULL){
+        list -> next = NULL;
     }
-    return prev_node;
+    return list;
 }
 
-void singly_linked_list_add_last(singly_linked_node *node, void *value) {
-    singly_linked_node *new_node = singly_linked_node_constructor();
-    new_node->value = value;
-    new_node->next = NULL;
-    singly_linked_node *buffer;
-    node = singly_linked_list_get_last(node, buffer);
-    node->next = new_node;
+linked_list *linked_list_init(void* value) {
+    linked_list *list = malloc(sizeof(void *));
+    if(list != NULL){
+        list -> value = value;
+        list -> next = NULL;
+    }
+    return list;
 }
 
-void singly_linked_list_add_first(singly_linked_node **node, void *value){
-    singly_linked_node *new_node = singly_linked_node_constructor();
+linked_list* get_last_node(linked_list *node){//OK
+    if (node != NULL) {
+        linked_list *prev_node = node;
+        while(node != NULL){
+            prev_node =  node;
+            node = node -> next;
+        }
+        return prev_node;
+    }
+    return NULL;
+}
+
+void* linked_list_get_last(linked_list *node) {//OK
+    if (node != NULL) {
+        linked_list *prev_node = node;
+        while(node != NULL){
+            prev_node =  node;
+            node = node -> next;
+        }
+        return prev_node -> value;
+    }
+    return NULL;
+}
+
+int  linked_list_push(linked_list *node, void* value){//OK
+    if(node != NULL) {
+        node = get_last_node(node);
+        if(node == NULL){
+            return -1;
+        }
+        linked_list* add_node = linked_list_node_constructor();
+        add_node -> value = value;
+        node -> next = add_node;
+        return 0;
+    }
+    return -1;
+}
+
+void* linked_list_pop(linked_list *node){//OK
+    if(node != NULL) {
+        linked_list * prev_node = node;
+        linked_list * last_node = node;
+        while(node != NULL){
+            prev_node = last_node;
+            last_node = node;
+            node = node -> next;
+        }
+        prev_node->next = NULL;
+        void* value = last_node -> value;
+        free(last_node);
+        return value;
+    }
+    return NULL;
+}
+
+int linked_list_add_last(linked_list *node, void *value) {
+    if(node != NULL) {
+        node = get_last_node(node);
+        if(node == NULL){
+            return -1;
+        }
+        linked_list* add_node = linked_list_node_constructor();
+        add_node -> value = value;
+        node -> next = add_node;
+        return 0;
+    }
+    return -1;
+}
+
+int linked_list_add_first(linked_list **node, void *value){
+    linked_list *new_node = linked_list_node_constructor();
+    if(new_node == NULL){
+        list_destroy(new_node);
+        return -1;
+    }
     new_node -> value = value;
     new_node->next = NULL;
-    singly_linked_node *buffer;
+    linked_list *buffer;
     if((*node) ->value!=NULL){
         buffer = new_node;
         new_node = *node;
@@ -41,9 +110,13 @@ void singly_linked_list_add_first(singly_linked_node **node, void *value){
     else{
         *node = new_node;
     }
+    return 0;
 }
 
-size_t singly_linked_list_get_size(singly_linked_node* node){
+size_t linked_list_get_size(linked_list* node){
+    if(node == NULL){
+        return -1;
+    }
     size_t index = 1;
     while(node != NULL){
         index += 1;
@@ -52,14 +125,29 @@ size_t singly_linked_list_get_size(singly_linked_node* node){
     return index;
 }
 
-singly_linked_node * singly_linked_list_get(singly_linked_node *node, size_t index){
-    size_t list_size = singly_linked_list_get_size(node);
+void * linked_list_get(linked_list *node, size_t index){
+    size_t list_size = linked_list_get_size(node);
     if(index > list_size){
-        return NULL;
+        return "NULL-value";
     }
-    while(index > 0){
-        index -= 1;
+    for(size_t i = 0; i<=index; i++){
         node = node -> next;
     }
-    return node;
+    return node -> value;
+}
+
+void list_destroy(linked_list* list){
+    linked_list* buffer;
+    while(list != NULL){
+        buffer = list;
+        list = list -> next;
+        free(buffer);
+    }
+}
+int linked_list_clone(linked_list *list, linked_list** clone){
+    if(list != NULL) {
+        //код копирования связного списка тута
+
+    }
+    return -1;
 }
