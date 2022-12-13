@@ -9,8 +9,10 @@
 #include "singly_linked_list.h"
 
 
-char* stream_readline(FILE* file);
-int parse_instructions_line(FILE* file, linked_list* list);
+char *stream_readline(FILE *file);
+
+int parse_instructions_line(FILE *file, linked_list *list);
+
 int console_start();
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_IO_STREAM_HANDLER_H

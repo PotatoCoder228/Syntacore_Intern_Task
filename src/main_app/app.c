@@ -4,7 +4,7 @@
 #include "../../include/app.h"
 #include "../../include/io_stream_handler.h"
 
-int app_start(){
+int app_start() {
     console_start();
     return 0;
 }

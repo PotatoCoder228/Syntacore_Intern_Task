@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include "../../include/commands.h"
 
-int commands_init(){
+int commands_init() {
 
 }
 
-void print_commands_help(){
+void print_commands_help() {
     printf("Предварительная справка по командам:\n");//Можно реализовать сначала дерево и потом запихать в него команда:описание
 }

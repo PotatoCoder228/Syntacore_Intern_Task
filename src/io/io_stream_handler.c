@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include "../../include/io_stream_handler.h"
 
-int read_command(char* buffer, size_t string_size){
+int read_command(char *buffer, size_t string_size) {
     size_t counter = 0;
     char character = getchar();
-    while(character != EOF && character != '\n' && character != '\0'){
-        if(counter >= string_size){
+    while (character != EOF && character != '\n' && character != '\0') {
+        if (counter >= string_size) {
             character = getchar();
             continue;
         }
@@ -22,11 +22,11 @@ int read_command(char* buffer, size_t string_size){
     return 0;
 }
 
-int console_start(){
+int console_start() {
     int8_t is_work = 1;
     printf("\nПриветствую, мастер Йода!\n");
-    while(is_work){
-        char* string[5] = {0};
+    while (is_work) {
+        char *string[5] = {0};
         read_command(string, 5);
         printf("%s", string);
     }
