@@ -14,6 +14,7 @@ typedef struct linked_list {
 
 linked_list *linked_list_init(void *value);
 
+
 linked_list *linked_list_node_constructor();
 
 void *linked_list_get_last(linked_list *node);

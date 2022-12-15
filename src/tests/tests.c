@@ -6,16 +6,7 @@
 #include "time.h"
 #include "../../include/singly_linked_list.h"
 
-int string_is_equal(char *str_1, char *str_2) {
-    size_t str_1_length = sizeof(str_1);
-    size_t str_2_length = sizeof(str_2);
-    for (size_t i = 0; i < str_1_length; i++) {
-        if (str_1[i] != str_2[i]) {
-            return 0;
-        }
-    }
-    return 1;
-}
+#include <string.h>
 
 char *get_format_time_now() {
     time_t now = time(0);
@@ -39,6 +30,7 @@ void print_log(FILE *stream, char *info) {
 }
 
 int linked_list_test() {
+    fflush_unlocked(stdout);
     print_log(stderr, "##########Test start!##########");
     print_log(stderr, "linked_list_init() testing...");
     linked_list *list = linked_list_init("List init string");
@@ -48,20 +40,23 @@ int linked_list_test() {
         return -1;
     }
     print_log(stderr, "linked_list_init() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list_push() testing...");
     linked_list_push(list, "First test string");
     linked_list_push(list, "Second test string");
     linked_list_push(list, "Third test string");
     print_log(stderr, "Push 3 values. 4 values in list.");
-    if (string_is_equal(list->value, "First test string")) {
+
+    if (strcmp(list->value, "List init string") != 0) {
         print_log(stderr, "linked_list_push() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
     }
     print_log(stderr, "linked_list_push() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list_pop testing...");
     void *value = linked_list_pop(list);
-    if (value == NULL || string_is_equal(list->value, "Third test string")) {
+    if (value == NULL || strcmp(value, "Third test string") != 0) {
         print_log(stderr, "linked_list_pop() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
@@ -69,30 +64,35 @@ int linked_list_test() {
     print_log(stderr, "Current list values:");
     print_linked_list(stderr, "%s", list);
     print_log(stderr, "linked_list_pop() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list_get_last() testing...");
     value = linked_list_get_last(list);
-    if (value == NULL || string_is_equal(list->value, "Third test string")) {
+    if (value == NULL || strcmp(value, "Second test string") != 0) {
         print_log(stderr, "linked_list_get_last() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
     }
     print_log(stderr, "linked_list_get_last() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list_add_first() testing...");
-    linked_list_add_first(&list, "Insert first");
-    if (string_is_equal(list->value, "Insert first")) {
+    int num = 1;
+    linked_list_add_first(&list, &num);
+    if (*((int *) (list->value)) != 1) {
         print_log(stderr, "linked_list_add_first() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
     }
     print_log(stderr, "linked_list_add_first() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list_add_last() testing...");
     linked_list_add_last(list, "Insert last");
-    if (string_is_equal(linked_list_get_last(list), "Insert last")) {
+    if (strcmp(linked_list_get_last(list), "Insert last") != 0) {
         print_log(stderr, "linked_list_add_last() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
     }
     print_log(stderr, "linked_list_add_last() is successful.");
+    fflush(stdout);
     print_log(stderr, "linked_list destroy...");
     list_destroy(list);
     print_log(stderr, "##########Test finish!##########");

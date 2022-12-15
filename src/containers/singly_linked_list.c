@@ -2,12 +2,19 @@
 // Created by potato_coder on 07.12.22.
 //
 
-
-//TODO доделать все методы и перепроверить всё!!!
 #include "../../include/singly_linked_list.h"
 
+void list_destroy(linked_list *list) {
+    linked_list *buffer;
+    while (list != NULL) {
+        buffer = list;
+        list = list->next;
+        free(buffer);
+    }
+}
+
 linked_list *linked_list_node_constructor() {
-    linked_list *list = malloc(sizeof(void *));
+    linked_list *list = malloc(sizeof(linked_list));
     if (list != NULL) {
         list->next = NULL;
     }
@@ -15,7 +22,7 @@ linked_list *linked_list_node_constructor() {
 }
 
 linked_list *linked_list_init(void *value) {
-    linked_list *list = malloc(sizeof(void *));
+    linked_list *list = malloc(sizeof(linked_list));
     if (list != NULL) {
         list->value = value;
         list->next = NULL;
@@ -78,7 +85,7 @@ void *linked_list_pop(linked_list *node) {//OK
     return NULL;
 }
 
-int linked_list_add_last(linked_list *node, void *value) {
+int linked_list_add_last(linked_list *node, void *value) {//OK
     if (node != NULL) {
         node = get_last_node(node);
         if (node == NULL) {
@@ -92,7 +99,7 @@ int linked_list_add_last(linked_list *node, void *value) {
     return -1;
 }
 
-int linked_list_add_first(linked_list **node, void *value) {
+int linked_list_add_first(linked_list **node, void *value) {//OK
     linked_list *new_node = linked_list_node_constructor();
     if (new_node == NULL) {
         list_destroy(new_node);
@@ -135,16 +142,7 @@ void *linked_list_get(linked_list *node, size_t index) {
     return node->value;
 }
 
-void list_destroy(linked_list *list) {
-    linked_list *buffer;
-    while (list != NULL) {
-        buffer = list;
-        list = list->next;
-        free(buffer);
-    }
-}
-
-void print_linked_list(FILE *stream, char *mode, linked_list *list) {
+void print_linked_list(FILE *stream, char *mode, linked_list *list) {//OK
     if (stream != NULL && list != NULL && mode != NULL) {
         size_t counter = 0;
         fprintf(stream, "%s", "\n[");
@@ -163,7 +161,7 @@ void print_linked_list(FILE *stream, char *mode, linked_list *list) {
     }
 }
 
-int linked_list_clone(linked_list *list, linked_list **clone) {
+int linked_list_clone(linked_list *list, linked_list **clone) {//TODO дописать клонирование и итератор по списку
     if (list != NULL) {
         //код копирования связного списка тута
 

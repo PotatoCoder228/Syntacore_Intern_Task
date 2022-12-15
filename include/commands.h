@@ -6,11 +6,12 @@
 #define SYNTACORE_TOOLS_INTERN_TASK_COMMANDS_H
 
 #include <stdint-gcc.h>
+#include "singly_linked_list.h"
 
-struct user_command {
+typedef struct user_command {
     int64_t name;
     int64_t arg;
-    char *decription;
+    char *description;
 } user_command;
 
 enum console_modes {
@@ -27,6 +28,8 @@ enum users_commands {
     TREE_SCRIPT = 2006
 };
 
-void print_commands_help();
+linked_list *commands_init();
+
+void print_commands_help(linked_list *commands_help_list);
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_COMMANDS_H
