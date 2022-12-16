@@ -2,9 +2,22 @@
 // Created by potato_coder on 07.12.22.
 //
 
+#include <stdint-gcc.h>
 #include "../../include/singly_linked_list.h"
 
-void list_destroy(linked_list *list) {
+void linked_list_destroy_all_values(linked_list *list) {
+    void *value;
+    while (list != NULL) {
+        value = list->value;
+        list = list->next;
+        free(value);
+    }
+}
+
+void linked_list_destroy(linked_list *list, int values_is_alloc) {
+    if (values_is_alloc == 1) {
+        linked_list_destroy_all_values(list);
+    }
     linked_list *buffer;
     while (list != NULL) {
         buffer = list;
@@ -102,7 +115,7 @@ int linked_list_add_last(linked_list *node, void *value) {//OK
 int linked_list_add_first(linked_list **node, void *value) {//OK
     linked_list *new_node = linked_list_node_constructor();
     if (new_node == NULL) {
-        list_destroy(new_node);
+        linked_list_destroy(new_node, 0);
         return -1;
     }
     new_node->value = value;
@@ -120,9 +133,6 @@ int linked_list_add_first(linked_list **node, void *value) {//OK
 }
 
 size_t linked_list_get_size(linked_list *node) {
-    if (node == NULL) {
-        return -1;
-    }
     size_t index = 1;
     while (node != NULL) {
         index += 1;
@@ -136,17 +146,41 @@ void *linked_list_get(linked_list *node, size_t index) {
     if (index > list_size) {
         return "NULL-value";
     }
-    for (size_t i = 0; i <= index; i++) {
+    for (size_t i = 0; i < index; i++) {
         node = node->next;
     }
     return node->value;
 }
 
+int linked_list_insert(linked_list **node, size_t index, void *value) {
+    size_t list_size = linked_list_get_size(*node);
+    if (index > list_size) {
+        return -1;
+    }
+    if (index == 0) {
+        linked_list *new_node = linked_list_node_constructor();
+        new_node->value = value;
+        new_node->next = *node;
+        *node = new_node;
+        return 0;
+    }
+    linked_list *new_node = linked_list_node_constructor();
+    new_node->value = value;
+    for (size_t i = 1; i < index; i++) {
+        *node = (*node)->next;
+    }
+    new_node->next = (*node)->next;
+    (*node)->next = new_node;
+    return 0;
+}
+
 void print_linked_list(FILE *stream, char *mode, linked_list *list) {//OK
+    fflush_unlocked(stdout);
     if (stream != NULL && list != NULL && mode != NULL) {
         size_t counter = 0;
         fprintf(stream, "%s", "\n[");
         while (list != NULL) {
+            rewind(stdout);
             fprintf(stream, mode, list->value);
             counter += 1;
             list = list->next;

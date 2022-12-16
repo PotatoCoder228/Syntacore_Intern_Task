@@ -41,7 +41,6 @@ linked_list *commands_init() {
 
 void print_commands_help(linked_list *commands_help_list) {
     printf("\nСправка по командам:\n");
-    fflush_unlocked(stdout);
     while (commands_help_list != NULL) {
         fflush(stdout);
         printf("%s\n", ((user_command *) (commands_help_list->value))->description);

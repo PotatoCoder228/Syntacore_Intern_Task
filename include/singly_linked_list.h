@@ -31,10 +31,14 @@ size_t linked_list_get_size(linked_list *node);
 
 void *linked_list_get(linked_list *node, size_t index);
 
-void list_destroy(linked_list *list);
+void linked_list_destroy(linked_list *list, int values_is_alloc);
 
 int linked_list_clone(linked_list *list, linked_list **clone);
 
 void print_linked_list(FILE *stream, char *mode, linked_list *list);
+
+void linked_list_destroy_all_values(linked_list *list);
+
+int linked_list_insert(linked_list **node, size_t index, void *value);
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_SINGLY_LINKED_LIST_H
