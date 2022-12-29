@@ -2,12 +2,31 @@
 // Created by potato_coder on 04.12.22.
 //
 
-#include <stdint-gcc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "../../include/io_stream_handler.h"
 #include "../../include/commands.h"
+
+extern int8_t is_work;
+
+void set_command_name(user_command *command, char *string) {
+    if (strcmp(string, "help") == 0) {
+        command->name = help_command;
+    } else if (strcmp(string, "exit") == 0) {
+        command->name = exit_command;
+    } else if (strcmp(string, "tree_script") == 0) {
+        command->name = tree_script_command;
+    } else if (strcmp(string, "k") == 0) {
+        command->name = k_command;
+    } else if (strcmp(string, "m") == 0) {
+        command->name = m_command;
+    } else if (strcmp(string, "n") == 0) {
+        command->name = n_command;
+    } else {
+        command->name = undefined_command;
+    }
+}
 
 char **get_command(linked_list *string) {//OK
     char *command = NULL;
@@ -24,7 +43,6 @@ char **get_command(linked_list *string) {//OK
             ((char *) (string->value))[0] == EOF || ((char *) (string->value))[0] == '\t') {
             break;
         }
-        //printf("%c\n",((char*)(string -> value))[0]);
         string = string->next;
         command_length++;
     }
@@ -44,17 +62,26 @@ char **get_command(linked_list *string) {//OK
     return command_and_arg;
 }
 
-int parse_command(user_command *command_struct, linked_list *user_input) {
-    char **command = get_command(user_input);
+void parse_command(user_command *command_struct, linked_list *user_input) {
+    char **command_and_arg = get_command(user_input);
     int64_t arg;
     char *end;
-    arg = strtol(command[1], &end, 10);
-    command_struct->arg = arg;
-    command_struct->name = 2004;//TODO
-    free(command[0]);
-    free(command[1]);
-    free(command);
-    return 0;
+    arg = strtol(command_and_arg[1], &end, 10);
+    if (arg != '\0') {
+        int64_t *arg_ptr = malloc(sizeof(int64_t));
+        arg_ptr[0] = arg;
+        command_struct->arg = arg_ptr;
+    } else {
+        char *arg_ptr = malloc(sizeof(command_and_arg[1]));
+        for (size_t i = 0; i < sizeof(command_and_arg[1]); i++) {
+            arg_ptr[i] = command_and_arg[1][i];
+        }
+        command_struct->arg = arg_ptr;
+    }
+    set_command_name(command_struct, command_and_arg[0]);
+    free(command_and_arg[0]);
+    free(command_and_arg[1]);
+    free(command_and_arg);
 }
 
 linked_list *read_command() {
@@ -64,7 +91,6 @@ linked_list *read_command() {
     size_t counter = 0;
     character[0] = getchar();
     character[1] = '\0';
-    //printf("%s", character);
     while (character[0] != EOF && character[0] != '\n' && character[0] != '\0') {
         if (counter == 0) {
             counter++;
@@ -84,10 +110,10 @@ linked_list *read_command() {
 }
 
 int console_start() {
-    int8_t is_work = 1;
+    is_work = 1;
     printf("\nДобро пожаловать в консольное приложение!\n");
-    linked_list *commands_help_list = commands_init();
-    print_commands_help(commands_help_list);
+    commands_init();
+    print_commands_help();
 
     /**
      * Идея: все команды читаются по очереди, помещаются в буфер,
@@ -101,11 +127,8 @@ int console_start() {
     while (is_work) {
         printf("\nВведите команду:");
         char_list = read_command();
-        //print_linked_list(stdout, "%s", char_list);
-        //printf("%s\n", string);
-        int status = parse_command(command, char_list);
-        printf("%ld\n", command->name);
-        printf("%ld\n", command->arg);
+        parse_command(command, char_list);
+        run_command(command);
         linked_list_destroy(char_list, 1);
         char_list = NULL;
     }

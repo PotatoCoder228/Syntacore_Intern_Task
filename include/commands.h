@@ -9,27 +9,30 @@
 #include "singly_linked_list.h"
 
 typedef struct user_command {
-    int64_t name;
-    int64_t arg;
+    void (*name)(void *arg);
+
+    void *arg;
     char *description;
 } user_command;
 
-enum console_modes {
-    READ_FROM_CONSOLE = 1001,
-    READ_FROM_FILE = 1002
-};
+void exit_command(void *arg);
 
-enum users_commands {
-    K = 2001,
-    M = 2002,
-    N = 2003,
-    EXIT = 2004,
-    HELP = 2005,
-    TREE_SCRIPT = 2006
-};
+void help_command(void *arg);
+
+void tree_script_command(void *arg);
+
+void k_command(void *arg);
+
+void m_command(void *arg);
+
+void n_command(void *arg);
+
+void undefined_command(void *arg);
+
+void run_command(user_command *command);
 
 linked_list *commands_init();
 
-void print_commands_help(linked_list *commands_help_list);
+void print_commands_help();
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_COMMANDS_H
