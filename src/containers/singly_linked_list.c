@@ -4,6 +4,26 @@
 
 #include <stdint-gcc.h>
 #include "../../include/singly_linked_list.h"
+typedef struct linked_list {
+    void *value;
+    struct linked_list *next;
+} linked_list;
+
+void* linked_list_get_node_value(linked_list* list){
+    return list -> value;
+}
+
+void linked_list_set_node_value(linked_list* list, void* value){
+    list -> value = value;
+}
+
+linked_list* linked_list_get_node_next(linked_list* list){
+    return list -> next;
+}
+
+void linked_list_set_node_next(linked_list* list, linked_list* next){
+    list -> next = next;
+}
 
 void linked_list_destroy_all_values(linked_list *list) {
     void *value;

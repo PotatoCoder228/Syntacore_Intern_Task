@@ -7,6 +7,6 @@ linked_list *commands_help_list;
 int8_t is_work;
 
 int main(void) {
-    //linked_list_test();
+    linked_list_test();
     return app_start();
 }

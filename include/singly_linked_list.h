@@ -7,10 +7,12 @@
 
 #include <malloc.h>
 
-typedef struct linked_list {
-    void *value;
-    struct linked_list *next;
-} linked_list;
+typedef struct linked_list linked_list;
+
+void* linked_list_get_node_value(linked_list* list);
+void linked_list_set_node_value(linked_list* list, void* value);
+linked_list* linked_list_get_node_next(linked_list* list);
+void linked_list_set_node_next(linked_list* list, linked_list* next);
 
 linked_list *linked_list_init(void *value);
 

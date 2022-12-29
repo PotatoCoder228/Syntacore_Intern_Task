@@ -39,11 +39,11 @@ char **get_command(linked_list *string) {//OK
     size_t command_length = 0;
     size_t arg_length = 0;
     while (string != NULL) {
-        if (((char *) (string->value))[0] == 32 || ((char *) (string->value))[0] == '\n' ||
-            ((char *) (string->value))[0] == EOF || ((char *) (string->value))[0] == '\t') {
+        if (((char *) linked_list_get_node_value(string))[0] == 32 || ((char *) linked_list_get_node_value(string))[0] == '\n' ||
+            ((char *) linked_list_get_node_value(string))[0] == EOF || ((char *) linked_list_get_node_value(string))[0] == '\t') {
             break;
         }
-        string = string->next;
+        string = linked_list_get_node_next(string);
         command_length++;
     }
     command = malloc(sizeof(char) * command_length);
@@ -55,8 +55,8 @@ char **get_command(linked_list *string) {//OK
     arg_length = list_size - command_length - 1;
     arg = malloc(sizeof(char) * (arg_length));
     for (size_t i = 0; i < arg_length; i++) {
-        arg[i] = ((char *) (string->value))[0];
-        string = string->next;
+        arg[i] = ((char *) linked_list_get_node_value(string))[0];
+        string = linked_list_get_node_next(string);
     }
     command_and_arg[1] = arg;
     return command_and_arg;

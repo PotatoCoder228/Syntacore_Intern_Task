@@ -46,7 +46,7 @@ int linked_list_test() {
     linked_list_push(list, "Third test string");
     print_log(stderr, "Push 3 values. 4 values in list.");
 
-    if (strcmp(list->value, "List init string") != 0) {
+    if (strcmp(linked_list_get_node_value(list), "List init string") != 0) {
         print_log(stderr, "linked_list_push() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
@@ -60,7 +60,6 @@ int linked_list_test() {
         return -1;
     }
     print_log(stderr, "Current list values:");
-    //print_linked_list(stderr, "%s", list);
     print_log(stderr, "linked_list_pop() is successful.");
     print_log(stderr, "linked_list_get_last() testing...");
     value = linked_list_get_last(list);
@@ -70,10 +69,9 @@ int linked_list_test() {
         return -1;
     }
     print_log(stderr, "linked_list_get_last() is successful.");
-    //print_linked_list(stderr, "%s", list);
     print_log(stderr, "linked_list_add_first() testing...");
     linked_list_add_first(&list, "new_first_value");
-    if (strcmp((list->value), "new_first_value") != 0) {
+    if (strcmp(linked_list_get_node_value(list), "new_first_value") != 0) {
         print_log(stderr, "linked_list_add_first() is failed test.");
         print_log(stderr, "##########Test finish!##########");
         return -1;
@@ -87,7 +85,8 @@ int linked_list_test() {
         return -1;
     }
     print_log(stderr, "linked_list_add_last() is successful.");
-    //linked_list_insert(&list, 0, "aboba");TODO сделать тест
+    //linked_list_insert(&list, 0, "aboba");
+    // TODO после отправки работы - дописать тесты для всех оставшихся функций
     //print_linked_list(stderr, "%s", list);
     char *string = linked_list_get(list, 1);
     print_linked_list(stderr, "%s", list);

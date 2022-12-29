@@ -15,7 +15,6 @@ void run_command(user_command *command) {
 
 void exit_command(void *arg) {
     is_work = 0;
-    //command_list_destroy();
 }
 
 void help_command(void *arg) {
@@ -81,7 +80,7 @@ void print_commands_help() {
     printf("\nСправка по командам:\n");
     while (buffer != NULL) {
         fflush(stdout);
-        printf("%s\n", ((user_command *) (buffer->value))->description);
-        buffer = buffer->next;
+        printf("%s\n", ((user_command *) linked_list_get_node_value(buffer))->description);
+        buffer = linked_list_get_node_next(buffer);
     }
 }
