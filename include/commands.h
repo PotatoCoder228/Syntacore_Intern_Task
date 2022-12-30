@@ -5,15 +5,44 @@
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_COMMANDS_H
 #define SYNTACORE_TOOLS_INTERN_TASK_COMMANDS_H
 
-#include <stdint-gcc.h>
+#include <stdint.h>
 #include "singly_linked_list.h"
 
-typedef struct user_command {
-    void (*name)(void *arg);
+enum commands {
+    HELP = 0,
+    EXIT,
+    TREE_SCRIPT,
+    M,
+    N,
+    K
+};
 
-    void *arg;
-    char *description;
-} user_command;
+static const char *descriptions[6] = {
+        "help - Выводит справку по командам",
+        "exit - Выход из приложения",
+        "tree_script <filename> - Выполнение скрипта, состоящего из ключей.",
+        "m <arg> - Запрос на поиск <arg>-го наименьшего элемента.",
+        "n <arg> - Поиск количества элементов, меньших, чем заданный i.",
+        "k <arg> - Вставка уникального ключа в дерево."
+};
+
+typedef struct user_command user_command;
+
+user_command *new_user_command(void callback(void *), void *arg, char *descr);
+
+void *user_command_get_callback(user_command *command);
+
+void user_command_set_callback(user_command *command, void callback(void *));
+
+void *user_command_get_arg(user_command *command);
+
+void user_command_set_arg(user_command *command, void *arg);
+
+char *user_command_get_description(user_command *command);
+
+void user_command_set_description(user_command *command, char *description);
+
+void user_command_destroy(user_command *command);
 
 void exit_command(void *arg);
 

@@ -5,7 +5,7 @@
 #include "tests.h"
 #include "time.h"
 #include "../../include/singly_linked_list.h"
-
+#include "stdlib.h"
 #include <string.h>
 
 char *get_format_time_now() {
@@ -23,11 +23,7 @@ char *get_format_time_now() {
 
 void print_log(FILE *stream, char *info) {
     char *time = get_format_time_now();
-    fprintf(stream, "%s", "\n");
-    fprintf(stream, "%s", time);
-    fprintf(stream, "%s", "[");
-    fprintf(stream, "%s", info);
-    fprintf(stream, "%s", "]\n");
+    fprintf(stream, "%s%s%s%s%s", "\n", time, "[", info, "]\n");
 }
 
 int linked_list_test() {

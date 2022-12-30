@@ -1,28 +1,29 @@
 //
 // Created by potato_coder on 07.12.22.
 //
-
-#include <stdint-gcc.h>
+#include <stdlib.h>
+#include "stdio.h"
 #include "../../include/singly_linked_list.h"
+
 typedef struct linked_list {
     void *value;
     struct linked_list *next;
 } linked_list;
 
-void* linked_list_get_node_value(linked_list* list){
-    return list -> value;
+void *linked_list_get_node_value(linked_list *list) {
+    return list->value;
 }
 
-void linked_list_set_node_value(linked_list* list, void* value){
-    list -> value = value;
+void linked_list_set_node_value(linked_list *list, void *value) {
+    list->value = value;
 }
 
-linked_list* linked_list_get_node_next(linked_list* list){
-    return list -> next;
+linked_list *linked_list_get_node_next(linked_list *list) {
+    return list->next;
 }
 
-void linked_list_set_node_next(linked_list* list, linked_list* next){
-    list -> next = next;
+void linked_list_set_node_next(linked_list *list, linked_list *next) {
+    list->next = next;
 }
 
 void linked_list_destroy_all_values(linked_list *list) {
@@ -153,18 +154,18 @@ int linked_list_add_first(linked_list **node, void *value) {//OK
 }
 
 size_t linked_list_get_size(linked_list *node) {
-    size_t index = 1;
+    size_t counter = 1;
     while (node != NULL) {
-        index += 1;
+        counter += 1;
         node = node->next;
     }
-    return index;
+    return counter;
 }
 
 void *linked_list_get(linked_list *node, size_t index) {
     size_t list_size = linked_list_get_size(node);
     if (index > list_size) {
-        return "NULL-value";
+        return NULL;
     }
     for (size_t i = 0; i < index; i++) {
         node = node->next;

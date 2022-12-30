@@ -8,23 +8,23 @@
 #include "../../include/io_stream_handler.h"
 #include "../../include/commands.h"
 
-extern int8_t is_work;
+extern int8_t is_working;
 
 void set_command_name(user_command *command, char *string) {
-    if (strcmp(string, "help") == 0) {
-        command->name = help_command;
-    } else if (strcmp(string, "exit") == 0) {
-        command->name = exit_command;
-    } else if (strcmp(string, "tree_script") == 0) {
-        command->name = tree_script_command;
-    } else if (strcmp(string, "k") == 0) {
-        command->name = k_command;
-    } else if (strcmp(string, "m") == 0) {
-        command->name = m_command;
-    } else if (strcmp(string, "n") == 0) {
-        command->name = n_command;
+    if (!strcmp(string, "help")) {
+        user_command_set_callback(command, help_command);
+    } else if (!strcmp(string, "exit")) {
+        user_command_set_callback(command, exit_command);
+    } else if (!strcmp(string, "tree_script")) {
+        user_command_set_callback(command, tree_script_command);
+    } else if (!strcmp(string, "k")) {
+        user_command_set_callback(command, k_command);
+    } else if (!strcmp(string, "m")) {
+        user_command_set_callback(command, m_command);
+    } else if (!strcmp(string, "n")) {
+        user_command_set_callback(command, n_command);
     } else {
-        command->name = undefined_command;
+        user_command_set_callback(command, undefined_command);
     }
 }
 
@@ -39,8 +39,10 @@ char **get_command(linked_list *string) {//OK
     size_t command_length = 0;
     size_t arg_length = 0;
     while (string != NULL) {
-        if (((char *) linked_list_get_node_value(string))[0] == 32 || ((char *) linked_list_get_node_value(string))[0] == '\n' ||
-            ((char *) linked_list_get_node_value(string))[0] == EOF || ((char *) linked_list_get_node_value(string))[0] == '\t') {
+        if (((char *) linked_list_get_node_value(string))[0] == 32 ||
+            ((char *) linked_list_get_node_value(string))[0] == '\n' ||
+            ((char *) linked_list_get_node_value(string))[0] == EOF ||
+            ((char *) linked_list_get_node_value(string))[0] == '\t') {
             break;
         }
         string = linked_list_get_node_next(string);
@@ -70,13 +72,13 @@ void parse_command(user_command *command_struct, linked_list *user_input) {
     if (arg != '\0') {
         int64_t *arg_ptr = malloc(sizeof(int64_t));
         arg_ptr[0] = arg;
-        command_struct->arg = arg_ptr;
+        user_command_set_arg(command_struct, arg_ptr);
     } else {
         char *arg_ptr = malloc(sizeof(command_and_arg[1]));
         for (size_t i = 0; i < sizeof(command_and_arg[1]); i++) {
             arg_ptr[i] = command_and_arg[1][i];
         }
-        command_struct->arg = arg_ptr;
+        user_command_set_arg(command_struct, arg_ptr);
     }
     set_command_name(command_struct, command_and_arg[0]);
     free(command_and_arg[0]);
@@ -110,7 +112,7 @@ linked_list *read_command() {
 }
 
 int console_start() {
-    is_work = 1;
+    is_working = 1;
     printf("\nДобро пожаловать в консольное приложение!\n");
     commands_init();
     print_commands_help();
@@ -118,13 +120,13 @@ int console_start() {
     /**
      * Идея: все команды читаются по очереди, помещаются в буфер,
      * потом вызывается метод, парсящий команду и образующий структуру команды,
-     * если что-то не так, то возвращается enum с ошибкой и ошибка выводится пользователю
+     * если что-то не так, то ошибка выводится пользователю
      * (отсутствие аргумента, неверная команда, аргумент - не число) и просьба ввести команду ещё раз
     */
     fflush_unlocked(stdout);
     linked_list *char_list;
-    user_command *command = malloc(sizeof(user_command));
-    while (is_work) {
+    user_command *command = new_user_command(NULL, NULL, NULL);
+    while (is_working) {
         printf("\nВведите команду:");
         char_list = read_command();
         parse_command(command, char_list);
@@ -132,5 +134,6 @@ int console_start() {
         linked_list_destroy(char_list, 1);
         char_list = NULL;
     }
+    user_command_destroy(command);
     return 0;
 }

@@ -3,21 +3,15 @@
 //
 
 #include "../../include/exceptions.h"
-#include <bits/types/FILE.h>
 #include <stdio.h>
 
 void app_print_status(FILE *file, int status) {
     switch (status) {
         case FILE_READ_ERROR:
-            fprintf(file, "\n[Ошибка при чтении из потока. Код статуса: ");
-            fprintf(file, "%d", FILE_READ_ERROR);
-            fprintf(file, "]\n");
+            fprintf(file, "%s%d%s", "\n[Ошибка при чтении из потока. Код статуса: ", FILE_READ_ERROR, "]\n");
             break;
         default:
-            fprintf(file, "\n[Непредвиденный статус ошибки. Код статуса: ");
-            fprintf(file, "%d", status);
-            fprintf(file, "]\n");
-            break;
+            fprintf(file, "%s%d%s", "\n[Непредвиденный статус ошибки. Код статуса: ", status, "]\n");
     }
 
 }

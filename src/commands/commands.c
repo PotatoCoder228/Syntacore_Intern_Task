@@ -3,18 +3,62 @@
 //
 
 #include <stdio.h>
+#include "stdlib.h"
 #include "../../include/commands.h"
 
 extern linked_list *commands_help_list;
-extern int8_t is_work;
+extern int8_t is_working;
+
+typedef struct user_command {
+    void (*callback)(void *arg);
+
+    void *arg;
+    char *description;
+} user_command;
+
+user_command *new_user_command(void callback(void *), void *arg, char *descr) {
+    user_command *command = malloc(sizeof(user_command));
+    command->callback = callback;
+    command->arg = arg;
+    command->description = descr;
+    return command;
+}
+
+void *user_command_get_callback(user_command *command) {
+    return command->callback;
+}
+
+void user_command_set_callback(user_command *command, void callback(void *)) {
+    command->callback = callback;
+}
+
+void *user_command_get_arg(user_command *command) {
+    return command->arg;
+}
+
+void user_command_set_arg(user_command *command, void *arg) {
+    command->arg = arg;
+}
+
+char *user_command_get_description(user_command *command) {
+    return command->description;
+}
+
+void user_command_set_description(user_command *command, char *description) {
+    command->description = description;
+}
+
+void user_command_destroy(user_command *command) {
+    free(command);
+}
 
 void run_command(user_command *command) {
-    void (*command_call)(void *arg) = command->name;
+    void (*command_call)(void *arg) = command->callback;
     command_call(command->arg);
 }
 
 void exit_command(void *arg) {
-    is_work = 0;
+    is_working = 0;
 }
 
 void help_command(void *arg) {
@@ -38,33 +82,17 @@ void n_command(void *arg) {
 }
 
 void undefined_command(void *arg) {
-    printf("\nНекорректная команда, попробуйте ввести ещё раз!\n");
-    printf("help - справка по командам\n");
+    printf("%s%s", "\nНекорректная команда, попробуйте ввести ещё раз!\n", "help - справка по командам\n");
 }
 
 linked_list *commands_init() {
-    user_command *command_help = malloc(sizeof(user_command));
-    command_help->name = help_command;
-    command_help->description = "help - Выводит справку по командам";
-    user_command *command_exit = malloc(sizeof(user_command));
-    command_exit->name = exit_command;
-    command_exit->description = "exit - Выход из приложения";
+    user_command *command_help = new_user_command(help_command, NULL, (void *) descriptions[HELP]);
+    user_command *command_exit = new_user_command(exit_command, NULL, (void *) descriptions[EXIT]);
+    user_command *command_tree_script = new_user_command(tree_script_command, NULL, (void *) descriptions[TREE_SCRIPT]);
+    user_command *key_m = new_user_command(m_command, NULL, (void *) descriptions[M]);
+    user_command *key_n = new_user_command(n_command, NULL, (void *) descriptions[N]);
+    user_command *key_k = new_user_command(k_command, NULL, (void *) descriptions[K]);
 
-    user_command *command_tree_script = malloc(sizeof(user_command));
-    command_tree_script->name = tree_script_command;
-    command_tree_script->description = "tree_script <filename> - Выполнение скрипта, состоящего из ключей.";
-
-    user_command *key_m = malloc(sizeof(user_command));
-    key_m->name = m_command;
-    key_m->description = "m <arg> - Запрос на поиск <arg>-го наименьшего элемента.";
-
-    user_command *key_n = malloc(sizeof(user_command));
-    key_n->name = n_command;
-    key_n->description = "n <arg> - Поиск количества элементов, меньших, чем заданный i.";
-
-    user_command *key_k = malloc(sizeof(user_command));
-    key_k->name = k_command;
-    key_k->description = "k <arg> - Вставка уникального ключа в дерево.";
     commands_help_list = linked_list_init(command_help);
     linked_list_push(commands_help_list, command_exit);
     linked_list_push(commands_help_list, command_tree_script);
