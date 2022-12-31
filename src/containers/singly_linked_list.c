@@ -7,7 +7,7 @@
 
 typedef struct linked_list {
     void *value;
-    struct linked_list *next;
+    struct linked_list *next;//8+8+1+(1)=18
 } linked_list;
 
 void *linked_list_get_node_value(linked_list *list) {
