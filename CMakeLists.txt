@@ -3,4 +3,4 @@ project(Syntacore_Tools_Intern_Task)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Syntacore_Tools_Intern_Task src/main_app/main.c src/io/io_stream_handler.c include/io_stream_handler.h src/main_app/app.c include/app.h src/exceptions/exceptions.c include/exceptions.h src/containers/singly_linked_list.c include/singly_linked_list.h src/commands/commands.c include/commands.h src/tests/tests.c src/tests/tests.h src/common.c src/common.h include/rb_tree.h src/containers/rb_tree.c)
+add_executable(Syntacore_Tools_Intern_Task src/command/command.c include/command/command.h src/console/console.c include/console/console.h src/containers/os_tree_s.c include/containers/os_tree_s.h src/containers/rb_tree_s.c include/containers/rb_tree_s.h src/object/object.c include/object/object.h src/containers/list_s.c include/containers/list_s.h include/containers/containers.h src/app.c include/app.h src/main.c src/containers/vector_s.c include/containers/vector_s.h include/containers/cont-common.h src/exceptions/error_s.c include/exceptions/error_s.h src/string/string_builder.c include/string/string_builder.h)
