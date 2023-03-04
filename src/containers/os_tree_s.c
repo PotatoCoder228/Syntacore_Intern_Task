@@ -158,13 +158,16 @@ os_tree_s *os_tree_search(os_tree_s *root, int64_t key) {
 
 size_t os_tree_find_counts_less_than(os_tree_s *root, int64_t num) {
     if (root != NULL && root != T) {
-        //printf("root->left->key: %ld", root->left->key);
-        if (root->key < num) {
-            return root->size;
-        } else if (root->left->key < num) {
-            return root->left->size;
+        os_tree_s *node = os_tree_search(root, num);
+        if (node != T && node != NULL) {
+            return (root->size) - (node->right->size);
+        } else {
+            node = os_tree_maximum(root);
+            while (node->key > num && node != T) {
+                node = node->p;
+            }
+            return (root->size) - (node->right->size);
         }
-        return os_tree_find_counts_less_than(root->left, num);
     }
     return 0;
 }
@@ -449,10 +452,10 @@ bool os_tree_delete(os_tree_s **root, int64_t key) {
                 x = z->left;
                 os_tree_transplant(root, z, z->left);
             } else {
-                y = (*root)->left;
-                while ((*root)->left != T) {
+                y = (*root);
+                while (y->left != T) {
                     y->size--;
-                    y = (*root)->left;
+                    y = y->left;
                 }
                 y_original_color = y->color;
                 x = y->right;
@@ -467,6 +470,7 @@ bool os_tree_delete(os_tree_s **root, int64_t key) {
                 y->left = z->left;
                 y->left->p = y;
                 y->color = z->color;
+                free(z);
             }
             if (y_original_color == BLACK) {
                 os_tree_delete_fix(root, x);

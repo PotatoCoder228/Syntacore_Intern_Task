@@ -5,6 +5,7 @@
 #include "../../include/console/console.h"
 #include "../../include/containers/containers.h"
 
+rb_tree_s *commands_tree = NULL;
 
 string_builder *read_line(FILE *stream, error_s *error) {
     if (stream == NULL) {
@@ -48,6 +49,12 @@ user_command *get_user_command_from_vector(vector_s *tokens) {
             user_command_set_callback(command, help_command);
         } else if (!strcmp(string_builder_get_string(name), "exit")) {
             user_command_set_callback(command, exit_command);
+        } else if (!strcmp(string_builder_get_string(name), "script")) {
+            user_command_set_callback(command, script_command);
+        } else if (!strcmp(string_builder_get_string(name), "clear")) {
+            user_command_set_callback(command, clear_command);
+        } else if (!strcmp(string_builder_get_string(name), "print")) {
+            user_command_set_callback(command, print_command);
         } else {
             user_command_set_callback(command, undefined_command);
         }
@@ -60,8 +67,8 @@ user_command *get_user_command_from_vector(vector_s *tokens) {
         user_command_set_callback(command, m_command);
     } else if (!strcmp(string_builder_get_string(name), "k")) {
         user_command_set_callback(command, k_command);
-    } else if (!strcmp(string_builder_get_string(name), "script")) {
-        user_command_set_callback(command, script_command);
+    } else if (!strcmp(string_builder_get_string(name), "d")) {
+        user_command_set_callback(command, d_command);
     } else {
         user_command_set_callback(command, undefined_command);
         return command;
@@ -83,9 +90,9 @@ user_command *parse_and_set_tree_command(vector_s *vector, size_t index) {
         } else if (!strcmp(string_builder_get_string(name), "k")) {
             command = new_user_command(NULL, NULL);
             user_command_set_callback(command, k_command);
-        } else if (!strcmp(string_builder_get_string(name), "script")) {
+        } else if (!strcmp(string_builder_get_string(name), "d")) {
             command = new_user_command(NULL, NULL);
-            user_command_set_callback(command, script_command);
+            user_command_set_callback(command, d_command);
         } else {
             command = NULL;
             return command;
@@ -97,17 +104,16 @@ user_command *parse_and_set_tree_command(vector_s *vector, size_t index) {
 }
 
 bool console(error_s *error) {
-    rb_tree_s *commands_tree = NULL;
     while (true) {
         printf("%s", "\nВведите команду:");
         string_builder *line = read_line(stdin, error);
         if (line == NULL) {
-            throw_exception(error, MEM_ALLOC_DENIED, "console(): недостаточно памяти для работы приложения.");
+            throw_exception(error, MEM_ALLOC_DENIED, "console(): недостаточно памяти для работы приложения.\n");
             return false;
         }
-        vector_s *tokens_vector = string_builder_get_tokens(line, " \t");
+        vector_s *tokens_vector = string_builder_get_tokens(line, " \t\r");
         if (tokens_vector == NULL || vector_get(tokens_vector, 0) == NULL) {
-            printf("Вы не ввели команду. Попробуйте снова.");
+            printf("Вы не ввели команду. Попробуйте снова.\n");
             string_builder_destroy(line);
             continue;
         } else if (vector_get_size(tokens_vector) < 3) {
@@ -138,13 +144,13 @@ bool console(error_s *error) {
             string_builder_destroy(line);
         } else {
             if (vector_get_size(tokens_vector) % 2 != 0) {
-                printf("Число команд не соответствует числу аргументов");
+                printf("Число команд не соответствует числу аргументов\n");
             } else {
                 vector_s *coms = new_vector();
                 for (size_t i = 0; i < vector_get_size(tokens_vector); i += 2) {
                     user_command *command = parse_and_set_tree_command(tokens_vector, i);
                     if (command == NULL) {
-                        printf("Некорректные команды.");
+                        printf("Некорректная команда.\n");
                         rb_tree_destroy(commands_tree, user_command_destroy);
                         commands_tree = NULL;
                         break;
@@ -176,11 +182,18 @@ bool console(error_s *error) {
                     }
                 } else {
                     for (size_t j = 0; j < vector_get_size(coms); j++) {
-                        rb_tree_delete(&commands_tree, object_get_value(vector_get(coms, j)), command_char_arg_compare);
+                        rb_tree_delete(&commands_tree, object_get_value(vector_get(coms, j)),
+                                       command_char_arg_compare, user_command_destroy);
                     }
                 }
             }
-            vector_destroy(tokens_vector, string_builder_destroy);
+            for (size_t i = 0; i < vector_get_size(tokens_vector); i += 2) {
+                user_command *command = object_get_value(vector_get(tokens_vector, i));
+                if (user_command_get_callback(command) != k_command) {
+                    user_command_destroy(command);
+                }
+            }
+            free(tokens_vector);
             string_builder_destroy(line);
         }
     }

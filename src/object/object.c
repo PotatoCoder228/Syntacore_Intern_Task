@@ -24,7 +24,7 @@ void *object_get_value(object_s *object) {
     return NULL;
 }
 
-char *object_to_string(object_s *object, char *to_string(void *)) {
+char *object_to_string(object_s *object, char *(to_string)(void *)) {
     if (object != NULL) {
         return to_string(object->value);
     }

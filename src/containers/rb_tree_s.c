@@ -386,7 +386,7 @@ static bool rb_tree_delete_fix(rb_tree_s **root, rb_tree_s *x) {
     return false;
 }
 
-bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *)) {
+bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *), void (*destroyer)(void *)) {
     rb_tree_s *z = rb_tree_search(*root, key, compare);
     if (root != NULL && z != NULL) {
         if (*root != NULL) {
@@ -400,7 +400,10 @@ bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *)
                 x = z->left;
                 rb_tree_transplant(root, z, z->left);
             } else {
-                y = rb_tree_minimum(*root);
+                y = (*root);
+                while (y->left != T) {
+                    y = y->left;
+                }
                 y_original_color = y->color;
                 x = y->right;
                 if (y != z->right) {
@@ -414,6 +417,8 @@ bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *)
                 y->left = z->left;
                 y->left->p = y;
                 y->color = z->color;
+                object_destroy(z->key, destroyer);
+                free(z);
             }
             if (y_original_color == BLACK) {
                 rb_tree_delete_fix(root, x);

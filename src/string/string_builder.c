@@ -26,13 +26,13 @@ void string_builder_set_string(string_builder *string_builder, const char *new_s
     if (string_builder != NULL) {
         size_t size = strlen(new_string);
         if (string_builder->string == NULL) {
-            string_builder->string = malloc(sizeof(char) * (size + 1));
+            string_builder->string = malloc(sizeof(char) * (size + 2));
             if (string_builder->string != NULL) {
                 string_builder->size = size;
             }
             string_builder->string[size] = '0';
         } else {
-            string_builder->string = realloc(string_builder->string, sizeof(char) * (size + 1));
+            string_builder->string = realloc(string_builder->string, sizeof(char) * (size + 2));
             if (string_builder->string != NULL) {
                 string_builder->size = size;
             }
@@ -102,7 +102,6 @@ void string_builder_destroy(void *builder) {
 }
 
 int string_builder_equals(string_builder *builder_1, string_builder *builder_2) {
-
     if (strcmp(builder_1->string, builder_2->string) == 0) {
         return 0;
     } else if (strcmp(builder_1->string, builder_2->string) > 0) {

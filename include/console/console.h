@@ -8,6 +8,9 @@
 #include <stdbool.h>
 #include "../../include/command/command.h"
 #include "../exceptions/error_s.h"
+#include "../containers/containers.h"
+
+user_command *parse_and_set_tree_command(vector_s *vector, size_t index);
 
 bool console(error_s *error);
 

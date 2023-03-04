@@ -12,6 +12,8 @@ int app_start(error_s *error);
 
 bool global_tree_init(int64_t key);
 
+void global_tree_print();
+
 bool global_tree_insert(int64_t key);
 
 int64_t global_tree_k_stat(size_t i);
@@ -19,6 +21,10 @@ int64_t global_tree_k_stat(size_t i);
 size_t global_tree_counts_less_than(int64_t k);
 
 void global_tree_destroy();
+
+void global_tree_clear();
+
+void global_tree_delete(int64_t num);
 
 bool global_tree_is_init();
 

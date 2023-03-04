@@ -35,6 +35,10 @@ void os_tree_set_color(os_tree_s *node, enum tree_color color);
 
 void os_tree_set_key(os_tree_s *node, int64_t key);
 
+size_t os_tree_get_size(os_tree_s *node);
+
+void os_tree_set_size(os_tree_s *node, size_t size);
+
 void os_tree_set_parent(os_tree_s *node, os_tree_s *parent);
 
 void os_tree_set_left(os_tree_s *node, os_tree_s *left);

@@ -9,8 +9,8 @@
 #include <stdlib.h>
 
 enum object_is {
-    NON_IN_HEAP,
-    IN_HEAP = 1
+    NON_IN_HEAP = 0,
+    IN_HEAP
 };
 
 typedef struct object_s object_s;
