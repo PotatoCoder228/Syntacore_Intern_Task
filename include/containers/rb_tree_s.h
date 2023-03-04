@@ -17,6 +17,8 @@ rb_tree_s *new_rb_tree(object_s *key);
 
 bool rb_tree_insert(rb_tree_s **root, object_s *key, int compare(void *, void *));
 
+bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *));
+
 rb_tree_s *rb_tree_search(rb_tree_s *node, object_s *key, int compare(void *, void *));
 
 void rb_tree_set_color(rb_tree_s *node, enum tree_color color);

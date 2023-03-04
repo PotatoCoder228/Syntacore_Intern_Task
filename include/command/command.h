@@ -25,20 +25,20 @@ enum command_consts {
 static const char *descriptions[DESCR_LEN] = {
         "help - Выводит справку по командам;",
         "script <filename> - Выполнение скрипта, состоящего из ключей.",
-        "m <arg> - Запрос на поиск <arg>-го наименьшего элемента.",
-        "n <arg> - Поиск количества элементов, меньших, чем заданный i.",
-        "k <arg> - Вставка уникального ключа в дерево.",
+        "m <arg> - Ключ на поиск <arg>-го наименьшего элемента.",
+        "n <arg> - Ключ на поиск количества элементов, меньших, чем заданный i.",
+        "k <arg> - Ключ на вставку уникального числа в дерево.",
         "exit - Выход из приложения;",
         "Вводить ключи можно в одну строчку."
 };
 
 typedef struct user_command user_command;
 
-user_command *new_user_command(void callback(error_s *), char *arg);
+user_command *new_user_command(void callback(user_command*, error_s *), char *arg);
 
 void *user_command_get_callback(user_command *command);
 
-void user_command_set_callback(user_command *command, void callback(error_s *));
+void user_command_set_callback(user_command *command, void callback(user_command *, error_s *));
 
 void *user_command_get_arg(user_command *command);
 
@@ -52,19 +52,19 @@ void user_command_destroy(void *command);
 
 void run_command(user_command *command, error_s *error);
 
-void k_command(error_s *error);
+void k_command(user_command *command, error_s *error);
 
-void n_command(error_s *error);
+void n_command(user_command *command, error_s *error);
 
-void m_command(error_s *error);
+void m_command(user_command *command, error_s *error);
 
-void script_command(error_s *error);
+void script_command(user_command *command, error_s *error);
 
-void undefined_command(error_s *error);
+void undefined_command(user_command *command, error_s *error);
 
-void help_command(error_s *error);
+void help_command(user_command *command, error_s *error);
 
-void exit_command(error_s *error);
+void exit_command(user_command *command, error_s *error);
 
 int command_char_arg_compare(void *com1, void *com2);
 

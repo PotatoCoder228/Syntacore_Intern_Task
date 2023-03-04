@@ -3,7 +3,7 @@
 //
 
 #include "../../include/string/string_builder.h"
-#include "../../include/containers/vector_s.h"
+#include "../../include/containers/containers.h"
 
 typedef struct string_builder {
     char *string;
