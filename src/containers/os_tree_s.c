@@ -125,6 +125,7 @@ os_tree_s *new_os_tree(int64_t key) {
         new_tree->left = T;
         new_tree->right = T;
         new_tree->key = key;
+        new_tree -> size = 0;
     }
     return new_tree;
 }
@@ -157,8 +158,12 @@ os_tree_s *os_tree_search(os_tree_s *root, int64_t key) {
 
 size_t os_tree_find_counts_less_than(os_tree_s *root, int64_t num) {
     if (root != NULL && root != T) {
-        if (root->left->key < num) {
-            return root->size;
+        //printf("root->left->key: %ld", root->left->key);
+        if (root->key < num){
+            return root -> size;
+        }
+        else if (root->left->key < num) {
+            return root -> left -> size;
         }
         return os_tree_find_counts_less_than(root->left, num);
     }
