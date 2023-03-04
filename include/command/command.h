@@ -34,7 +34,7 @@ static const char *descriptions[DESCR_LEN] = {
 
 typedef struct user_command user_command;
 
-user_command *new_user_command(void callback(user_command*, error_s *), char *arg);
+user_command *new_user_command(void callback(user_command *, error_s *), char *arg);
 
 void *user_command_get_callback(user_command *command);
 

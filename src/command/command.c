@@ -11,7 +11,7 @@ typedef struct user_command {
     void *arg;
 } user_command;
 
-user_command *new_user_command(void callback(user_command*, error_s *), char *arg) {
+user_command *new_user_command(void callback(user_command *, error_s *), char *arg) {
     user_command *command = malloc(sizeof(user_command));
     if (command != NULL) {
         command->callback = callback;
@@ -84,10 +84,9 @@ void n_command(user_command *command, error_s *error) {
             printf("Некорректное значение аргумента для ключа.\n");
             return;
         }
-        if(global_tree_is_init()){
+        if (global_tree_is_init()) {
             printf("Количество чисел, меньших, чем %ld: %ld\n", key, global_tree_counts_less_than(key));
-        }
-        else{
+        } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
     }
@@ -105,10 +104,9 @@ void m_command(user_command *command, error_s *error) {
             printf("Некорректное значение аргумента для ключа.\n");
             return;
         }
-        if(global_tree_is_init()){
+        if (global_tree_is_init()) {
             printf("%ld-ый наименьший элемент: %ld\n", key, global_tree_k_stat(key));
-        }
-        else{
+        } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
     }

@@ -165,8 +165,7 @@ bool console(error_s *error) {
                             printf("Либо какое-то из чисел уже есть в дереве.\n");
                             break;
                         }
-                    }
-                    else{
+                    } else {
                         object_s *key = new_object(command, IN_HEAP);
                         vector_push(coms, key);
                     }
