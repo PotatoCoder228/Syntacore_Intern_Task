@@ -6,6 +6,8 @@
 #define SYNTACORE_TOOLS_INTERN_TASK_CONSOLE_H
 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "../../include/command/command.h"
 #include "../exceptions/error_s.h"
 #include "../containers/containers.h"

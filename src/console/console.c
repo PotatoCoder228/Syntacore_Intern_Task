@@ -2,7 +2,6 @@
 // Created by sasha on 04.03.2023.
 //
 
-#include <sys/unistd.h>
 #include "../../include/console/console.h"
 #include "../../include/containers/containers.h"
 
@@ -26,7 +25,7 @@ string_builder *read_line(FILE *stream, error_s *error) {
     character[1] = '\0';
     while (character[0] == EOF && stream == stdin) {
         printf("%s", "\nНекорректный ввод, попробуйте ввести ещё раз:");
-        clearerr_unlocked(stdin);
+        clearerr(stdin);
         character[0] = fgetc(stream);
     }
     while (character[0] != '\0' && character[0] != '\n' && feof(stream) == 0) {

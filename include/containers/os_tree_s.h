@@ -5,7 +5,7 @@
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_OS_TREE_S_H
 #define SYNTACORE_TOOLS_INTERN_TASK_OS_TREE_S_H
 
-#include <stdint-gcc.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
