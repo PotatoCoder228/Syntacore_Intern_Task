@@ -5,7 +5,7 @@
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_IO_HANDLER_H
 #define SYNTACORE_TOOLS_INTERN_TASK_IO_HANDLER_H
 
-#include <bits/types/FILE.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>

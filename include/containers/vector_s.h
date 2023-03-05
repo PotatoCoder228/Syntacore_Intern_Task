@@ -7,7 +7,6 @@
 
 #include "cont-common.h"
 #include "../object/object.h"
-#include <bits/types/FILE.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>

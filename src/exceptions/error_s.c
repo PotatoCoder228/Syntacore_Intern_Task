@@ -37,7 +37,7 @@ int error_get_code(error_s *error) {
     if (error != NULL) {
         return error->code;
     }
-    return MAXINT;
+    return INT_MAX;
 }
 
 void error_print(error_s *error) {

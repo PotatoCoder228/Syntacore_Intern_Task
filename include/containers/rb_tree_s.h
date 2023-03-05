@@ -5,7 +5,7 @@
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_RB_TREE_S_H
 #define SYNTACORE_TOOLS_INTERN_TASK_RB_TREE_S_H
 
-#include <bits/types/FILE.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include "../object/object.h"
 #include "cont-common.h"

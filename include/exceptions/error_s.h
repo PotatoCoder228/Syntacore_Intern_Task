@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <values.h>
+#include <limits.h>
 #include "../string/string_builder.h"
 
 enum system_error_codes {

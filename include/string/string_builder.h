@@ -11,7 +11,6 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-#include <bits/types/FILE.h>
 #include "../containers/vector_s.h"
 
 typedef struct string_builder string_builder;
