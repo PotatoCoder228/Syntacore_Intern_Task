@@ -125,7 +125,7 @@ os_tree_s *new_os_tree(int64_t key) {
         new_tree->left = T;
         new_tree->right = T;
         new_tree->key = key;
-        new_tree->size = 0;
+        new_tree->size = 1;
     }
     return new_tree;
 }
@@ -142,34 +142,28 @@ os_tree_s *new_os_tree_node(int64_t key) {
     return new_tree;
 }
 
+bool os_tree_is_empty(os_tree_s *root) {
+    return (root == NULL || root == T);
+}
+
 os_tree_s *os_tree_search(os_tree_s *root, int64_t key) {
     if (root != NULL) {
         if (root == T || key == root->key) {
             return root;
         }
         if (key < root->key) {
+            if (root->left == T) {
+                return root;
+            }
             return os_tree_search(root->left, key);
         } else {
+            if (root->right == T) {
+                return root;
+            }
             return os_tree_search(root->right, key);
         }
     }
     return NULL;
-}
-
-size_t os_tree_find_counts_less_than(os_tree_s *root, int64_t num) {
-    if (root != NULL && root != T) {
-        os_tree_s *node = os_tree_search(root, num);
-        if (node != T && node != NULL) {
-            return (root->size) - (node->right->size);
-        } else {
-            node = os_tree_maximum(root);
-            while (node->key > num && node != T) {
-                node = node->p;
-            }
-            return (root->size) - (node->right->size);
-        }
-    }
-    return 0;
 }
 
 os_tree_s *os_tree_maximum(os_tree_s *root) {
@@ -180,6 +174,58 @@ os_tree_s *os_tree_maximum(os_tree_s *root) {
         return root;
     }
     return NULL;
+}
+
+os_tree_s *os_tree_select(os_tree_s *x, size_t i) {
+    if (x != NULL && i > 0) {
+        size_t r = x->left->size + 1;
+        if (i == r) {
+            return x;
+        } else if (i < r) {
+            return os_tree_select(x->left, i);
+        } else {
+            return os_tree_select(x->right, i - r);
+        }
+    }
+    return NULL;
+}
+
+size_t os_tree_rank(os_tree_s *root, os_tree_s *x) {
+    size_t r = x->left->size + 1;
+    os_tree_s *y = x;
+    while (y != root) {
+        if (y == y->p->right) {
+            r = r + y->p->left->size + 1;
+        }
+        y = y->p;
+    }
+    return r;
+}
+
+size_t os_tree_find_nearest_smaller(os_tree_s *root, int64_t num) {
+    if (root != NULL && root != T) {
+        os_tree_s *node = os_tree_search(root, num);
+        os_tree_s *buf = node;
+        size_t rights_branches = node->right->size;
+        if (node->key < num) {
+            while (node != T) {
+                node = node->p;
+                if (node->key >= buf->key) {
+                    rights_branches += node->right->size;
+                }
+            }
+            return root->size - rights_branches;
+        } else {
+            while (node != T) {
+                node = node->p;
+                if (node->key >= buf->key) {
+                    rights_branches += node->right->size + 1;
+                }
+            }
+            return root->size - rights_branches - 1;
+        }
+    }
+    return 0;
 }
 
 os_tree_s *os_tree_minimum(os_tree_s *root) {
@@ -239,8 +285,10 @@ static bool os_tree_right_rotate(os_tree_s **root, os_tree_s *x) {
 
         y->right = x;
         x->p = y;
-        y->size = x->size;
-        x->size = x->left->size + x->right->size + 1;
+        if (*root != T) {
+            y->size = x->size;
+            x->size = x->left->size + x->right->size + 1;
+        }
         return true;
     }
     return false;
@@ -269,8 +317,10 @@ static bool os_tree_left_rotate(os_tree_s **root, os_tree_s *x) {
 
         y->left = x;
         x->p = y;
-        y->size = x->size;
-        x->size = x->left->size + x->right->size + 1;
+        if (*root != T) {
+            y->size = x->size;
+            x->size = x->left->size + x->right->size + 1;
+        }
         return true;
     }
     return false;
@@ -440,8 +490,8 @@ static bool os_tree_delete_fix(os_tree_s **root, os_tree_s *x) {
 
 bool os_tree_delete(os_tree_s **root, int64_t key) {
     os_tree_s *z = os_tree_search(*root, key);
-    if (root != NULL && z != NULL) {
-        if (*root != NULL) {
+    if (root != NULL && z != T && z != NULL) {
+        if (*root != NULL&&*root) {
             os_tree_s *x;
             os_tree_s *y = z;
             enum tree_color y_original_color = y->color;
@@ -452,10 +502,9 @@ bool os_tree_delete(os_tree_s **root, int64_t key) {
                 x = z->left;
                 os_tree_transplant(root, z, z->left);
             } else {
-                y = (*root);
-                while (y->left != T) {
-                    y->size--;
-                    y = y->left;
+                y = (z->left);
+                while (y->right != T) {
+                    y = y->right;
                 }
                 y_original_color = y->color;
                 x = y->right;
@@ -470,41 +519,26 @@ bool os_tree_delete(os_tree_s **root, int64_t key) {
                 y->left = z->left;
                 y->left->p = y;
                 y->color = z->color;
-                free(z);
+                y->size = z->size;
+                z->key = 0;
+            }
+            os_tree_s *buf = x;
+            while (buf != *root) {
+                if (buf != T) {
+                    buf->size--;
+                }
+                buf = buf->p;
+            }
+            if (buf != T) {
+                buf->size--;
             }
             if (y_original_color == BLACK) {
                 os_tree_delete_fix(root, x);
             }
         }
-        return true;
+        return false;
     }
     return false;
-}
-
-os_tree_s *os_tree_select(os_tree_s *x, size_t i) {
-    if (x != NULL && i > 0) {
-        size_t r = x->left->size + 1;
-        if (i == r) {
-            return x;
-        } else if (i < r) {
-            return os_tree_select(x->left, i);
-        } else {
-            return os_tree_select(x->right, i - r);
-        }
-    }
-    return NULL;
-}
-
-size_t os_tree_rank(os_tree_s *root, os_tree_s *x) {
-    size_t r = x->left->size + 1;
-    os_tree_s *y = x;
-    while (y != root) {
-        if (y == y->p->right) {
-            r = r + y->p->left->size + 1;
-        }
-        y = y->p;
-    }
-    return r;
 }
 
 

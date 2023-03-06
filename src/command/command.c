@@ -97,13 +97,13 @@ void n_command(user_command *command, error_s *error) {
 }
 
 void script_command(user_command *command, error_s *error) {
+    error_set_default(error);
     printf("Введите имя файла:");
     string_builder *arg = read_line(stdin, error);
     if (arg == NULL) {
         throw_exception(error, INPUT_STREAM_READ_ERROR, "script command: Не удалось прочитать строку.");
     }
-    FILE *file = NULL;
-    open_file(&file, string_builder_get_string(arg), R, error);
+    FILE *file = open_file(string_builder_get_string(arg), R, error);
     if (file == NULL) {
         string_builder_destroy(arg);
         return;
@@ -161,7 +161,7 @@ void script_command(user_command *command, error_s *error) {
         free(tokens);
         string_builder_destroy(file_line);
     }
-    close_file(&file, error);
+    close_file(file, error);
     string_builder_destroy(arg);
 }
 
@@ -190,8 +190,8 @@ void print_command(user_command *command, error_s *error) {
 }
 
 void clear_command(user_command *command, error_s *error) {
-    global_tree_clear();
     printf("%s\n", "Очищение дерева...");
+    global_tree_clear();
 }
 
 void d_command(user_command *command, error_s *error) {

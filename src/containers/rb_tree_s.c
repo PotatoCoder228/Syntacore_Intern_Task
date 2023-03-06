@@ -3,6 +3,7 @@
 //
 
 #include "../../include/containers/rb_tree_s.h"
+#include "../../include/command/command.h"
 
 
 /**
@@ -305,7 +306,7 @@ bool rb_tree_insert(rb_tree_s **root, object_s *key, int compare(void *, void *)
     return false;
 }
 
-static bool rb_tree_transplant(rb_tree_s **root, rb_tree_s *from, rb_tree_s *to) {
+static bool rb_tree_transplant(rb_tree_s **root, rb_tree_s *from, rb_tree_s *to) {//OK
     if (root != NULL && to != NULL && from != NULL) {
         if (*root != NULL) {
             if (from->p == T) {
@@ -323,7 +324,7 @@ static bool rb_tree_transplant(rb_tree_s **root, rb_tree_s *from, rb_tree_s *to)
     return false;
 }
 
-static bool rb_tree_delete_fix(rb_tree_s **root, rb_tree_s *x) {
+static bool rb_tree_delete_fix(rb_tree_s **root, rb_tree_s *x) {//OK
     if (root != NULL && x != NULL) {
         if (*root != NULL) {
             rb_tree_s *w;
@@ -388,8 +389,8 @@ static bool rb_tree_delete_fix(rb_tree_s **root, rb_tree_s *x) {
 
 bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *), void (*destroyer)(void *)) {
     rb_tree_s *z = rb_tree_search(*root, key, compare);
-    if (root != NULL && z != NULL) {
-        if (*root != NULL) {
+    if (root != NULL && z != T && z != NULL) {
+        if (*root != NULL && *root != T) {
             rb_tree_s *x;
             rb_tree_s *y = z;
             enum tree_color y_original_color = y->color;
@@ -400,9 +401,9 @@ bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *)
                 x = z->left;
                 rb_tree_transplant(root, z, z->left);
             } else {
-                y = (*root);
-                while (y->left != T) {
-                    y = y->left;
+                y = (z->left);
+                while (y->right != T) {
+                    y = y->right;
                 }
                 y_original_color = y->color;
                 x = y->right;
@@ -417,8 +418,6 @@ bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *)
                 y->left = z->left;
                 y->left->p = y;
                 y->color = z->color;
-                object_destroy(z->key, destroyer);
-                free(z);
             }
             if (y_original_color == BLACK) {
                 rb_tree_delete_fix(root, x);
@@ -433,17 +432,17 @@ void rb_tree_print(rb_tree_s *node, char *(to_string)(void *), int depth) {
     if (node != T && node != NULL) {
         rb_tree_print(node->right, to_string, depth + 1);
         if (depth == 0) {
-            printf("----%s\n", object_to_string(node->key, to_string));
+            printf("----%d\n", object_to_string(node->key, to_string));
         } else if (node->p->right == node) {
             for (int i = 0; i < depth; i++) {
                 printf("     ");
             }
-            printf("/---%s\n", object_to_string(node->key, to_string));
+            printf("/---%d\n", object_to_string(node->key, to_string));
         } else if (node->p->left == node) {
             for (int i = 0; i < depth; i++) {
                 printf("     ");
             }
-            printf("\\---%s\n", object_to_string(node->key, to_string));
+            printf("\\---%d\n", object_to_string(node->key, to_string));
         }
         rb_tree_print(node->left, to_string, depth + 1);
     } else {

@@ -17,7 +17,13 @@ error_s *new_error() {
 }
 
 void error_set_message(error_s *error, string_builder *message) {
-    error->message = message;
+    if (error != NULL) {
+        if (error->message != NULL) {
+            string_builder_destroy(error->message);
+            error->message = NULL;
+        }
+        error->message = message;
+    }
 }
 
 string_builder *error_get_message(error_s *error) {
@@ -63,6 +69,10 @@ void throw_exception(error_s *error, int code, char *message) {
         error_set_message(error, string);
         fprintf(stderr, "\n");
         error_print_to(stderr, error);
+        if (string != NULL) {
+            free(string);
+        }
+        free(error);
         exit(EXIT_FAILURE);
     }
 }

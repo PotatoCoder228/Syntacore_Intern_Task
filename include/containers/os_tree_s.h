@@ -44,6 +44,8 @@ void os_tree_set_left(os_tree_s *node, os_tree_s *left);
 
 void os_tree_set_right(os_tree_s *node, os_tree_s *right);
 
+bool os_tree_is_empty(os_tree_s *root);
+
 int64_t os_tree_get_key(os_tree_s *node);
 
 enum tree_color os_tree_get_color(os_tree_s *node);
@@ -62,7 +64,7 @@ os_tree_s *os_tree_select(os_tree_s *x, size_t i);
 
 size_t os_tree_rank(os_tree_s *root, os_tree_s *x);
 
-size_t os_tree_find_counts_less_than(os_tree_s *root, int64_t num);
+size_t os_tree_find_nearest_smaller(os_tree_s *root, int64_t num);
 
 void os_tree_destroy(os_tree_s *x);
 
