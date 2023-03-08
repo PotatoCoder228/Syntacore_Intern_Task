@@ -24,106 +24,30 @@
  * (n j) - поиск количества элементов, меньшего, чем заданный j
  * */
 
+
 typedef struct os_tree_s {
+    int8_t color;
+    int64_t key;
     size_t size;
-    enum tree_color color;
     os_tree_s *p;
     os_tree_s *left;
     os_tree_s *right;
-    int64_t key;
 } os_tree_s;
 
-void os_tree_set_size(os_tree_s *node, size_t size) {
-    if (node != NULL) {
-        node->size = size;
-    }
-}
-
-void os_tree_set_color(os_tree_s *node, enum tree_color color) {
-    if (node != NULL) {
-        node->color = color;
-    }
-}
-
-void os_tree_set_key(os_tree_s *node, int64_t key) {
-    if (node != NULL) {
-        node->key = key;
-    }
-}
-
-void os_tree_set_parent(os_tree_s *node, os_tree_s *parent) {
-    if (node != NULL) {
-        node->p = parent;
-    }
-}
-
-void os_tree_set_left(os_tree_s *node, os_tree_s *left) {
-    if (node != NULL) {
-        node->left = left;
-    }
-}
-
-void os_tree_set_right(os_tree_s *node, os_tree_s *right) {
-    if (node != NULL) {
-        node->right = right;
-    }
-}
-
-size_t os_tree_get_size(os_tree_s *node) {
-    if (node != NULL) {
-        return node->size;
-    }
-    return 0;
-}
-
-int64_t os_tree_get_key(os_tree_s *node) {
-    if (node != NULL) {
-        return node->key;
-    }
-    return 0;
-}
-
-enum tree_color os_tree_get_color(os_tree_s *node) {
-    if (node != NULL) {
-        return node->color;
-    }
-    return BLACK;
-}
-
-os_tree_s *os_tree_get_parent(os_tree_s *node) {
-    if (node != NULL) {
-        return node->p;
-    }
-    return NULL;
-}
-
-os_tree_s *os_tree_get_left(os_tree_s *node) {
-    if (node != NULL) {
-        return node->left;
-    }
-    return NULL;
-}
-
-os_tree_s *os_tree_get_right(os_tree_s *node) {
-    if (node != NULL) {
-        return node->right;
-    }
-    return NULL;
-}
 
 static os_tree_s nil = {.p = NULL, .left = NULL, .right = NULL, .key = 0, .color = BLACK, .size = 0};
-static os_tree_s *T = &nil;
+static os_tree_s *EMPTY_TREE_NODE = &nil;
 
 os_tree_s *new_os_tree(int64_t key) {
-    nil.p = T;
-    nil.left = T;
-    nil.right = T;
+    nil.p = EMPTY_TREE_NODE;
+    nil.left = EMPTY_TREE_NODE;
+    nil.right = EMPTY_TREE_NODE;
     os_tree_s *new_tree = malloc(sizeof(os_tree_s));
     if (new_tree) {
         new_tree->color = BLACK;
-        new_tree->p = T;
-        new_tree->left = T;
-        new_tree->right = T;
+        new_tree->p = EMPTY_TREE_NODE;
+        new_tree->left = EMPTY_TREE_NODE;
+        new_tree->right = EMPTY_TREE_NODE;
         new_tree->key = key;
         new_tree->size = 1;
     }
@@ -134,46 +58,393 @@ os_tree_s *new_os_tree_node(int64_t key) {
     os_tree_s *new_tree = malloc(sizeof(os_tree_s));
     if (new_tree) {
         new_tree->color = BLACK;
-        new_tree->p = T;
-        new_tree->left = T;
-        new_tree->right = T;
+        new_tree->p = EMPTY_TREE_NODE;
+        new_tree->left = EMPTY_TREE_NODE;
+        new_tree->right = EMPTY_TREE_NODE;
         new_tree->key = key;
+        new_tree->size = 1;
     }
     return new_tree;
 }
 
-bool os_tree_is_empty(os_tree_s *root) {
-    return (root == NULL || root == T);
+bool os_tree_node_is_empty(os_tree_s *root) {
+    return (root == NULL || root == EMPTY_TREE_NODE);
 }
 
-os_tree_s *os_tree_search(os_tree_s *root, int64_t key) {
-    if (root != NULL) {
-        if (root == T || key == root->key) {
-            return root;
-        }
-        if (key < root->key) {
-            if (root->left == T) {
-                return root;
+
+void os_tree_destroy(void *node) {
+    if (!os_tree_node_is_empty(node)) {
+        os_tree_destroy(((os_tree_s *) node)->right);
+        os_tree_destroy(((os_tree_s *) node)->left);
+        free(node);
+    }
+}
+
+void os_tree_set_size(os_tree_s *node, size_t size) {
+    if (!os_tree_node_is_empty(node)) node->size = size;
+}
+
+void os_tree_set_color(os_tree_s *node, int8_t color) {
+    if (!os_tree_node_is_empty(node)) node->color = color;
+}
+
+void os_tree_set_key(os_tree_s *node, int64_t key) {
+    if (!os_tree_node_is_empty(node)) node->key = key;
+}
+
+void os_tree_set_parent(os_tree_s *node, os_tree_s *parent) {
+    if (!os_tree_node_is_empty(node)) node->p = parent;
+}
+
+void os_tree_set_left(os_tree_s *node, os_tree_s *left) {
+    if (!os_tree_node_is_empty(node)) node->left = left;
+}
+
+void os_tree_set_right(os_tree_s *node, os_tree_s *right) {
+    if (!os_tree_node_is_empty(node)) node->right = right;
+}
+
+size_t os_tree_get_size(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->size;
+    }
+    return 0;
+}
+
+int64_t os_tree_get_key(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->key;
+    }
+    return 0;
+}
+
+int8_t os_tree_get_color(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->color;
+    }
+    return BLACK;
+}
+
+os_tree_s *os_tree_get_parent(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->p;
+    }
+    return NULL;
+}
+
+os_tree_s *os_tree_get_left(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->left;
+    }
+    return NULL;
+}
+
+os_tree_s *os_tree_get_right(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        return node->right;
+    }
+    return NULL;
+}
+
+void os_tree_inorder_print(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        os_tree_inorder_print(node->left);
+        printf("%ld ", node->key);
+        os_tree_inorder_print(node->right);
+    }
+}
+
+void os_tree_print(os_tree_s *root, int depth) {
+    if (!os_tree_node_is_empty(root)) {
+        os_tree_print(root->right, depth + 1);
+        if (depth == 0) {
+            printf("----%ld(color:%d, size:%ld)\n", root->key, root->color, root->size);
+        } else if (root->p->right == root) {
+            for (int i = 0; i < depth; i++) {
+                printf("     ");
             }
-            return os_tree_search(root->left, key);
+            printf("/---%ld(color:%d, size:%ld)\n", root->key, root->color, root->size);
+        } else if (root->p->left == root) {
+            for (int i = 0; i < depth; i++) {
+                printf("     ");
+            }
+            printf("\\---%ld(color:%d, size:%ld)\n", root->key, root->color, root->size);
+        }
+        os_tree_print(root->left, depth + 1);
+    }
+}
+
+os_tree_s *os_tree_search(os_tree_s *node, int64_t target) {
+    if (os_tree_node_is_empty(node) || target == node->key) {
+        return node;
+    }
+    if (target < node->key) {
+        return os_tree_search(node->left, target);
+    } else {
+        return os_tree_search(node->right, target);
+    }
+}
+
+os_tree_s *os_tree_faster_search(os_tree_s *node, int64_t target) {
+    while ((!os_tree_node_is_empty(node))) {
+        if (target != node->key) {
+            if (target < node->key) {
+                node = node->left;
+            } else node = node->right;
+            continue;
+        }
+        break;
+    }
+    return node;
+}
+
+os_tree_s *os_tree_max(os_tree_s *node) {
+    while (!os_tree_node_is_empty(node->right)) {
+        node = node->right;
+    }
+    return node;
+}
+
+os_tree_s *os_tree_min(os_tree_s *node) {
+    while (!os_tree_node_is_empty(node->left)) {
+        node = node->left;
+    }
+    return node;
+}
+
+os_tree_s *os_tree_successor(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node->right)) {
+        return os_tree_min(node->right);
+    }
+    os_tree_s *buf = node->p;
+    while (!os_tree_node_is_empty(buf) && node == buf->right) {
+        node = buf;
+        buf = buf->p;
+    }
+    return buf;
+}
+
+os_tree_s *os_tree_predecessor(os_tree_s *node) {
+    if (!os_tree_node_is_empty(node->left)) {
+        return os_tree_max(node->left);
+    }
+    os_tree_s *buf = node->p;
+    while (!os_tree_node_is_empty(buf) && node == buf->left) {
+        node = buf;
+        buf = buf->p;
+    }
+    return buf;
+}
+
+static void os_tree_left_rotate(os_tree_s **root, os_tree_s *x) {
+    os_tree_s *y = x->right;
+    x->right = y->left;
+    if (!os_tree_node_is_empty(y->left)) {
+        y->left->p = x;
+    }
+    y->p = x->p;
+    if (os_tree_node_is_empty(x->p)) {
+        *root = y;
+    } else if (x == x->p->left) {
+        x->p->left = y;
+    } else x->p->right = y;
+    y->left = x;
+    x->p = y;
+    y->size = x->size;
+    x->size = x->left->size + x->right->size + 1;
+}
+
+static void os_tree_right_rotate(os_tree_s **root, os_tree_s *x) {
+    os_tree_s *y = x->left;
+    x->left = y->right;
+    if (!os_tree_node_is_empty(y->right)) {
+        y->right->p = x;
+    }
+    y->p = x->p;
+    if (os_tree_node_is_empty(x->p)) {
+        *root = y;
+    } else if (x == x->p->right) {
+        x->p->right = y;
+    } else x->p->left = y;
+    y->right = x;
+    x->p = y;
+    y->size = x->size;
+    x->size = x->left->size + x->right->size + 1;
+}
+
+static void os_tree_insert_fixup(os_tree_s **root, os_tree_s *node) {
+    os_tree_s *y;
+    while (node->p->color == RED) {
+        if (node->p == node->p->p->left) {
+            y = node->p->p->right;
+            if (y->color == RED) {
+                node->p->color = BLACK;
+                y->color = BLACK;
+                node->p->p->color = RED;
+                node = node->p->p;
+            } else {
+                if (node == node->p->right) {
+                    node = node->p;
+                    os_tree_left_rotate(root, node);
+                }
+                node->p->color = BLACK;
+                node->p->p->color = RED;
+                os_tree_right_rotate(root, node->p->p);
+            }
         } else {
-            if (root->right == T) {
-                return root;
+            y = node->p->p->left;
+            if (y->color == RED) {
+                node->p->color = BLACK;
+                y->color = BLACK;
+                node->p->p->color = RED;
+                node = node->p->p;
+            } else {
+                if (node == node->p->left) {
+                    node = node->p;
+                    os_tree_right_rotate(root, node);
+                }
+                node->p->color = BLACK;
+                node->p->p->color = RED;
+                os_tree_left_rotate(root, node->p->p);
             }
-            return os_tree_search(root->right, key);
         }
     }
-    return NULL;
+    (*root)->color = BLACK;
 }
 
-os_tree_s *os_tree_maximum(os_tree_s *root) {
+bool os_tree_insert(os_tree_s **root, os_tree_s *z) {
     if (root != NULL) {
-        while (root->right != T) {
-            root = root->right;
+        if (*root == NULL || z == NULL) return false;
+        os_tree_s *x = *root;
+        os_tree_s *y = EMPTY_TREE_NODE;
+        while (!os_tree_node_is_empty(x)) {
+            x->size++;
+            y = x;
+            if (z->key < x->key) x = x->left;
+            else x = x->right;
         }
-        return root;
+        z->p = y;
+        if (os_tree_node_is_empty(y)) {
+            *root = z;
+        } else if (z->key < y->key) y->left = z;
+        else y->right = z;
+        z->left = EMPTY_TREE_NODE;
+        z->right = EMPTY_TREE_NODE;
+        z->color = RED;
+        os_tree_insert_fixup(root, z);
+        return true;
     }
-    return NULL;
+    return false;
+}
+
+static void os_tree_transplant(os_tree_s **root, os_tree_s *u, os_tree_s *v) {
+    if (os_tree_node_is_empty(u->p)) {
+        *root = v;
+    } else if (u == u->p->left) {
+        u->p->left = v;
+    } else u->p->right = v;
+    v->p = u->p;
+}
+
+static void os_tree_delete_fixup(os_tree_s **root, os_tree_s *x) {
+    while (x != *root && x->color == BLACK) {
+        os_tree_s *w;
+        if (x == x->p->left) {
+            w = x->p->right;
+            if (w->color == RED) {
+                w->color = BLACK;
+                x->p->color = RED;
+                os_tree_left_rotate(root, x->p);
+                w = x->p->right;
+            }
+            if (w->left->color == BLACK && w->right->color == BLACK) {
+                w->color = RED;
+                x = x->p;
+            } else {
+                if (w->right->color == BLACK) {
+                    w->left->color = BLACK;
+                    w->color = RED;
+                    os_tree_right_rotate(root, w);
+                    w = x->p->right;
+                }
+                w->color = x->p->color;
+                x->p->color = BLACK;
+                w->right->color = BLACK;
+                os_tree_left_rotate(root, x->p);
+                x = *root;
+            }
+        } else {
+            w = x->p->left;
+            if (w->color == RED) {
+                w->color = BLACK;
+                x->p->color = RED;
+                os_tree_right_rotate(root, x->p);
+                w = x->p->left;
+            }
+            if (w->right->color == BLACK && w->left->color == BLACK) {
+                w->color = RED;
+                x = x->p;
+            } else {
+                if (w->left->color == BLACK) {
+                    w->right->color = BLACK;
+                    w->color = RED;
+                    os_tree_left_rotate(root, w);
+                    w = x->p->left;
+                }
+                w->color = x->p->color;
+                x->p->color = BLACK;
+                w->left->color = BLACK;
+                os_tree_right_rotate(root, x->p);
+                x = *root;
+            }
+        }
+    }
+    x->color = BLACK;
+}
+
+bool os_tree_delete(os_tree_s **root, os_tree_s *z) {
+    if (!os_tree_node_is_empty(*root) && !os_tree_node_is_empty(z)) {
+        os_tree_s *x;
+        os_tree_s *y = z;
+        int8_t y_original_color = y->color;
+        if (os_tree_node_is_empty(z->left)) {
+            x = z->right;
+            os_tree_transplant(root, z, z->right);
+        } else if (os_tree_node_is_empty(z->right)) {
+            x = z->left;
+            os_tree_transplant(root, z, z->left);
+        } else {
+            y = os_tree_min(z->right);
+            y_original_color = y->color;
+            x = y->right;
+            if (y != z->right) {
+                os_tree_transplant(root, y, y->right);
+                y->right = z->right;
+                y->right->p = y;
+            } else x->p = y;
+            os_tree_transplant(root, z, y);
+            y->left = z->left;
+            y->left->p = y;
+            y->color = z->color;
+            y->size = z->size;
+        }
+        os_tree_s *buf = x;
+        while (buf != *root) {
+            if (!os_tree_node_is_empty(buf)) {
+                buf->size--;
+            }
+            buf = buf->p;
+        }
+        if (!os_tree_node_is_empty(buf)) {
+            buf->size--;
+        }
+        if (y_original_color == BLACK) {
+            os_tree_delete_fixup(root, x);
+        }
+        free(z);
+        return true;
+    }
+    return false;
 }
 
 os_tree_s *os_tree_select(os_tree_s *x, size_t i) {
@@ -202,395 +473,56 @@ size_t os_tree_rank(os_tree_s *root, os_tree_s *x) {
     return r;
 }
 
-size_t os_tree_find_nearest_smaller(os_tree_s *root, int64_t num) {
-    if (root != NULL && root != T) {
-        os_tree_s *node = os_tree_search(root, num);
-        os_tree_s *buf = node;
-        size_t rights_branches = node->right->size;
-        if (node->key < num) {
-            while (node != T) {
-                node = node->p;
-                if (node->key >= buf->key) {
-                    rights_branches += node->right->size;
+size_t os_tree_find_less_than(os_tree_s *root, int64_t num) {
+    if (!os_tree_node_is_empty(root)) {
+        os_tree_s *node = root;
+        while (!os_tree_node_is_empty(node) && node->key != num) {
+            if (num < node->key) {
+                if (os_tree_node_is_empty(node->left)) {
+                    while ((node->p->key > num) && node->p != EMPTY_TREE_NODE) {
+                        node = node->p;
+                    }
+                    if (node->key < num) {
+                        return os_tree_rank(root, node);
+                    }
+                    if (node->left->key < num && !os_tree_node_is_empty(node->left)) {
+                        node = node->left;
+                    } else if (node->p->key < num) {
+                        node = node->p;
+                    }
+                    printf("%ld ", node->key);
+                    return os_tree_rank(root, node);
                 }
-            }
-            return root->size - rights_branches;
-        } else {
-            while (node != T) {
-                node = node->p;
-                if (node->key >= buf->key) {
-                    rights_branches += node->right->size + 1;
+                node = node->left;
+            } else {
+                if (os_tree_node_is_empty(node->right)) {
+                    while ((node->p->key > num) && (node->left->key > num) && node->p != EMPTY_TREE_NODE) {
+                        node = node->p;
+                    }
+                    if (node->key < num) {
+                        return os_tree_rank(root, node);
+                    }
+                    if (node->left->key < num) {
+                        node = node->left;
+                    } else if (node->p->key < num) {
+                        node = node->p;
+                    }
+                    printf("%ld ", node->key);
+                    return os_tree_rank(root, node);
                 }
+                node = node->right;
             }
-            return root->size - rights_branches - 1;
         }
+        printf("%ld ", node->key);
+        return os_tree_rank(root, node) - 1;
     }
     return 0;
 }
 
-os_tree_s *os_tree_minimum(os_tree_s *root) {
-    if (root != NULL) {
-        while (root->left != T) {
-            root = root->left;
-        }
-        return root;
-    }
-    return NULL;
-}
-
-os_tree_s *os_tree_predecessor(os_tree_s *x) {
-    if (x->left != T) {
-        return os_tree_minimum(x->left);
-    }
-    os_tree_s *y = x->p;
-    while (y != T && x == y->left) {
-        x = y;
-        y = y->p;
-    }
-    return y;
-}
-
-os_tree_s *os_tree_successor(os_tree_s *x) {
-    if (x->right != T) {
-        return os_tree_minimum(x->right);
-    }
-    os_tree_s *y = x->p;
-    while (y != T && x == y->right) {
-        x = y;
-        y = y->p;
-    }
-    return y;
-}
-
-static bool os_tree_right_rotate(os_tree_s **root, os_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        os_tree_s *y = x->left;
-        x->left = y->right;
-
-        if (y->right != T) {
-            y->right->p = x;
-        }
-        y->p = x->p;
-
-        if (x->p == T) {
-            *root = y;
-        } else if (x == x->p->right) {
-            x->p->right = y;
-        } else {
-            x->p->left = y;
-        }
-
-        y->right = x;
-        x->p = y;
-        if (*root != T) {
-            y->size = x->size;
-            x->size = x->left->size + x->right->size + 1;
-        }
-        return true;
-    }
-    return false;
-}
-
-static bool os_tree_left_rotate(os_tree_s **root, os_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        os_tree_s *y = x->right;
-        x->right = y->left;
-
-        if (y->left != T) {
-            y->left->p = x;
-        }
-        y->p = x->p;
-
-        if (x->p == T) {
-            *root = y;
-        } else if (x == x->p->left) {
-            x->p->left = y;
-        } else {
-            x->p->right = y;
-        }
-
-        y->left = x;
-        x->p = y;
-        if (*root != T) {
-            y->size = x->size;
-            x->size = x->left->size + x->right->size + 1;
-        }
-        return true;
-    }
-    return false;
-}
-
-static bool os_tree_insert_fixup(os_tree_s **root, os_tree_s *z) {
-    os_tree_s *y;
-    if (root != NULL && z != NULL) {
-        while (z->p->color == RED) {
-            if (z->p == z->p->p->left) {
-                y = z->p->p->right;
-                if (y->color == RED) {
-                    z->p->color = BLACK;
-                    y->color = BLACK;
-                    z->p->p->color = RED;
-                    z = z->p->p;
-                } else {
-                    if (z == z->p->right) {
-                        z = z->p;
-                        os_tree_left_rotate(root, z);
-                    }
-                    z->p->color = BLACK;
-                    z->p->p->color = RED;
-                    os_tree_right_rotate(root, z->p->p);
-                }
-            } else {
-                y = z->p->p->left;
-                if (y->color == RED) {
-                    z->p->color = BLACK;
-                    y->color = BLACK;
-                    z->p->p->color = RED;
-                    z = z->p->p;
-                } else {
-                    if (z == z->p->left) {
-                        z = z->p;
-                        os_tree_right_rotate(root, z);
-                    }
-                    z->p->color = BLACK;
-                    z->p->p->color = RED;
-                    os_tree_left_rotate(root, z->p->p);
-                }
-            }
-        }
-        (*root)->color = BLACK;
-        return true;
-    }
-    return false;
-}
-
-bool os_tree_insert(os_tree_s **root, int64_t object) {
-    if (root != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        os_tree_s *z = new_os_tree_node(object);
-        z->size = 1;
-        if (z == NULL) {
-            return false;
-        }
-        os_tree_s *x = *root;
-        os_tree_s *y = T;
-        while (x != T) {
-            x->size++;
-            y = x;
-            if (z->key < x->key) {
-                x = x->left;
-            } else {
-                x = x->right;
-            }
-        }
-        z->p = y;
-        if (y == T) {
-            *root = z;
-        } else if (z->key < y->key) {
-            y->left = z;
-        } else {
-            y->right = z;
-        }
-        z->left = T;
-        z->right = T;
-        z->color = RED;
-        return os_tree_insert_fixup(root, z);
-    }
-    return false;
-}
-
-static bool os_tree_transplant(os_tree_s **root, os_tree_s *u, os_tree_s *v) {
-    if (root != NULL && v != NULL && u != NULL) {
-        if (*root != NULL) {
-            if (u->p == T) {
-                (*root) = v;
-            } else if (u == u->p->left) {
-                u->p->left = v;
-            } else {
-                u->p->right = v;
-            }
-            v->p = u->p;
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
-
-static bool os_tree_delete_fix(os_tree_s **root, os_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root != NULL) {
-            os_tree_s *w;
-            while ((x != *root) && (x->color == BLACK)) {
-                if (x == x->p->left) {
-                    w = x->p->right;
-                    if (w->color == RED) {
-                        w->color = BLACK;
-                        x->p->color - RED;
-                        os_tree_left_rotate(root, x->p);
-                        w = x->p->right;
-                    }
-                    if ((w->left->color == BLACK) && (w->right->color == BLACK)) {
-                        w->color = RED;
-                        x = x->p;
-                    } else {
-                        if (w->right->color == BLACK) {
-                            w->left->color = BLACK;
-                            w->color = RED;
-                            os_tree_right_rotate(root, w);
-                            w = x->p->right;
-                        }
-                        w->color = x->p->color;
-                        x->p->color = BLACK;
-                        x->right->color = BLACK;
-                        os_tree_left_rotate(root, x->p);
-                        x = *root;
-                    }
-                } else {
-                    w = x->p->left;
-                    if (w->color == RED) {
-                        w->color = BLACK;
-                        x->p->color = RED;
-                        os_tree_right_rotate(root, x->p);
-                        w = x->p->left;
-                    }
-                    if ((w->right->color == BLACK) && (w->left->color == BLACK)) {
-                        w->color = RED;
-                        x = x->p;
-                    } else {
-                        if (w->left->color == BLACK) {
-                            w->right->color = BLACK;
-                            w->color = RED;
-                            os_tree_left_rotate(root, w);
-                            w = x->p->left;
-                        }
-                        w->color = x->p->color;
-                        x->p->color = BLACK;
-                        w->left->color = BLACK;
-                        os_tree_right_rotate(root, x->p);
-                        x = *root;
-                    }
-                }
-            }
-            x->color = BLACK;
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
-
-bool os_tree_delete(os_tree_s **root, int64_t key) {
-    os_tree_s *z = os_tree_search(*root, key);
-    if (root != NULL && z != T && z != NULL) {
-        if (*root != NULL&&*root) {
-            os_tree_s *x;
-            os_tree_s *y = z;
-            enum tree_color y_original_color = y->color;
-            if (z->left == T) {
-                x = z->right;
-                os_tree_transplant(root, z, z->right);
-            } else if (z->right == T) {
-                x = z->left;
-                os_tree_transplant(root, z, z->left);
-            } else {
-                y = (z->left);
-                while (y->right != T) {
-                    y = y->right;
-                }
-                y_original_color = y->color;
-                x = y->right;
-                if (y != z->right) {
-                    os_tree_transplant(root, y, y->right);
-                    y->right = z->right;
-                    y->right->p = y;
-                } else {
-                    x->p = y;
-                }
-                os_tree_transplant(root, z, y);
-                y->left = z->left;
-                y->left->p = y;
-                y->color = z->color;
-                y->size = z->size;
-                z->key = 0;
-            }
-            os_tree_s *buf = x;
-            while (buf != *root) {
-                if (buf != T) {
-                    buf->size--;
-                }
-                buf = buf->p;
-            }
-            if (buf != T) {
-                buf->size--;
-            }
-            if (y_original_color == BLACK) {
-                os_tree_delete_fix(root, x);
-            }
-        }
-        return false;
-    }
-    return false;
-}
-
-
-void os_tree_print(os_tree_s *root, int depth) {
-    if (root != T && root != NULL) {
-        os_tree_print(root->right, depth + 1);
-        if (depth == 0) {
-            printf("----%ld\n", root->key);
-        } else if (root->p->right == root) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("/---%ld\n", root->key);
-        } else if (root->p->left == root) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("\\---%ld\n", root->key);
-        }
-        os_tree_print(root->left, depth + 1);
-
-    } else {
-        return;
-    }
-}
-
-void os_tree_print_to(FILE *stream, os_tree_s *root, int depth) {
-    if (root != T && root != NULL) {
-        os_tree_print_to(stream, root->right, depth + 1);
-        if (depth == 0) {
-            printf("----%ld\n", root->key);
-        } else if (root->p->right == root) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("/---%ld\n", root->key);
-        } else if (root->p->left == root) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("\\---%ld\n", root->key);
-        }
-        os_tree_print_to(stream, root->left, depth + 1);
-    } else {
-        return;
-    }
-}
-
-void os_tree_destroy(os_tree_s *x) {
-    if (x != NULL && x != T) {
-        os_tree_destroy(x->right);
-        os_tree_destroy(x->left);
-        free(x);
+void os_inorder_print(FILE *stream, os_tree_s *node) {
+    if (!os_tree_node_is_empty(node)) {
+        os_inorder_print(stream, node->left);
+        fprintf(stream, "%ld ", node->key);
+        os_inorder_print(stream, node->right);
     }
 }

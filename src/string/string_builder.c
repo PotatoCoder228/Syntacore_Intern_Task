@@ -85,7 +85,7 @@ vector_s *string_builder_get_tokens(string_builder *string, char *sep) {
             return NULL;
         }
         string_builder_set_string(token, buf);
-        vector_push(result, new_object(token, IN_HEAP));
+        vector_push(result, (void *) token);
         buf = strtok(NULL, sep);
     }
     return result;
@@ -105,7 +105,7 @@ int string_builder_equals(string_builder *builder_1, string_builder *builder_2) 
     if (strcmp(builder_1->string, builder_2->string) == 0) {
         return 0;
     } else if (strcmp(builder_1->string, builder_2->string) > 0) {
-        return -1;
+        return 1;
     }
-    return 1;
+    return -1;
 }
