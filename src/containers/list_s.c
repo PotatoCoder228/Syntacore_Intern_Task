@@ -5,8 +5,8 @@
 #include "../../include/containers/list_s.h"
 
 typedef struct list_s {
-    object_s *object;
-    struct list_s *next;
+    object_s object;
+    list_s *next;
 } list_s;
 
 object_s *list_get_object(list_s *list) {
@@ -16,10 +16,8 @@ object_s *list_get_object(list_s *list) {
     return NULL;
 }
 
-void list_set_object(list_s *list, object_s *object) {
-    if (list != NULL) {
-        list->object = object;
-    }
+void list_set_object(list_s *list, object_s object) {
+    list->object = object;
 }
 
 list_s *list_get_next(list_s *list) {
@@ -30,20 +28,24 @@ list_s *list_get_next(list_s *list) {
 }
 
 void list_set_next(list_s *list, list_s *next) {
-    if (list != NULL) {
-        list->next = next;
+    list->next = next;
+}
+
+void list_foreach_free(list_s *list, void (*destroy)(void *data)) {
+    list_s *buffer;
+    while (list != NULL) {
+        buffer = list;
+        list = list->next;
+        destroy(buffer->object);
     }
 }
 
-void list_destroy(list_s *list, void (*destroyer)(void *data)) {
+void list_destroy(list_s *list) {
     if (list != NULL) {
         list_s *buffer;
         while (list != NULL) {
             buffer = list;
             list = list->next;
-            object_destroy(buffer->object, destroyer);
-            buffer->object = NULL;
-            buffer->next = NULL;
             free(buffer);
         }
     }
@@ -58,7 +60,7 @@ list_s *new_list_node() {
     return list;
 }
 
-list_s *new_list(object_s *object) {
+list_s *new_list(object_s object) {
     list_s *list = malloc(sizeof(list_s));
     if (list != NULL) {
         list->object = object;
@@ -91,7 +93,7 @@ object_s *list_get_last_value(list_s *node) {
     return NULL;
 }
 
-bool list_push(list_s *node, object_s *object) {
+bool list_push(list_s *node, object_s object) {
     if (node != NULL) {
         node = list_get_last_node(node);
         if (node == NULL) {
@@ -122,7 +124,7 @@ object_s *list_pop(list_s *node) {
     return NULL;
 }
 
-bool list_add_last(list_s *node, object_s *object) {
+bool list_add_last(list_s *node, object_s object) {
     if (node != NULL) {
         node = list_get_last_node(node);
         if (node == NULL) {
@@ -136,7 +138,7 @@ bool list_add_last(list_s *node, object_s *object) {
     return false;
 }
 
-bool list_add_first(list_s **node, object_s *object) {
+bool list_add_first(list_s **node, object_s object) {
     if (node == NULL) {
         return false;
     }
@@ -189,7 +191,7 @@ bool list_delete(list_s **list, size_t index, void (*destroyer)(void *data)) {
             buf = start;
             start = start->next;
         }
-        object_destroy(start->object, destroyer);
+        destroyer(start->object);
         buf->next = start->next;
         free(start);
         return true;
@@ -197,7 +199,7 @@ bool list_delete(list_s **list, size_t index, void (*destroyer)(void *data)) {
     return false;
 }
 
-bool list_insert(list_s **node, size_t index, object_s *object) {
+bool list_insert(list_s **node, size_t index, object_s object) {
     if (node == NULL) {
         return false;
     }
@@ -231,16 +233,9 @@ void list_foreach(list_s *list, callback iter_func) {
     }
 }
 
-void list_print(list_s *list, char *(to_string)(void *)) {
+void list_print(FILE *stream, list_s *list, int(printer)(FILE *, char *, void *)) {
     while (list != NULL) {
-        printf("{%s} ", object_to_string(list->object, to_string));
-        list = list->next;
-    }
-}
-
-void list_print_to(FILE *stream, list_s *list, char *(to_string)(void *)) {
-    while (list != NULL) {
-        fprintf(stream, "{%s} ", object_to_string(list->object, to_string));
+        printer(stream, "%s", list->object);
         list = list->next;
     }
 }

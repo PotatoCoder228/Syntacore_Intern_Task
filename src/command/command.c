@@ -97,13 +97,13 @@ void n_command(user_command *command, error_s *error) {
 }
 
 void script_command(user_command *command, error_s *error) {
+    error_set_default(error);
     printf("Введите имя файла:");
     string_builder *arg = read_line(stdin, error);
     if (arg == NULL) {
         throw_exception(error, INPUT_STREAM_READ_ERROR, "script command: Не удалось прочитать строку.");
     }
-    FILE *file = NULL;
-    open_file(&file, string_builder_get_string(arg), R, error);
+    FILE *file = open_file(string_builder_get_string(arg), R, error);
     if (file == NULL) {
         string_builder_destroy(arg);
         return;
@@ -121,20 +121,21 @@ void script_command(user_command *command, error_s *error) {
         for (size_t i = 0; i < vector_get_size(tokens); i += 2) {
             user_command *com = parse_and_set_tree_command(tokens, i);
             if (com == NULL) {
-                printf("Некорректная команда.");
-                rb_tree_destroy(commands_tree, user_command_destroy);
+                printf("Некорректная команда.\n");
+                rb_foreach_free(commands_tree, user_command_destroy);
+                rb_destroy(commands_tree);
                 commands_tree = NULL;
                 break;
             }
             if (user_command_get_callback(com) == k_command) {
-                object_s *key = new_object(com, IN_HEAP);
+                object_s *key = (void *) com;
                 //rb_tree_print(commands_tree, user_command_to_string,0);
-                rb_tree_s *buf = rb_tree_search(commands_tree, key, command_char_arg_compare);
-                if (rb_tree_get_key(buf) == NULL) {
+                rb_tree_s *buf = rb_search(commands_tree, key, command_char_arg_compare);
+                if (rb_is_empty(buf)) {
                     if (commands_tree == NULL) {
                         commands_tree = new_rb_tree(key);
                     } else {
-                        rb_tree_insert(&commands_tree, key, command_char_arg_compare);
+                        rb_insert(&commands_tree, new_rb_node(key), command_char_arg_compare);
                     }
                     vector_push(coms, key);
                 } else {
@@ -143,25 +144,24 @@ void script_command(user_command *command, error_s *error) {
                     break;
                 }
             } else {
-                object_s *key = new_object(com, IN_HEAP);
+                object_s *key = (void *) com;
                 vector_push(coms, key);
             }
         }
         if (commands_tree != NULL) {
             for (size_t j = 0; j < vector_get_size(coms); j++) {
-                run_command(object_get_value(vector_get(coms, j)), error);
+                run_command(vector_get(coms, j), error);
             }
         } else {
             for (size_t j = 0; j < vector_get_size(coms); j++) {
-                rb_tree_delete(&commands_tree, object_get_value(vector_get(coms, j)), command_char_arg_compare,
-                               user_command_destroy);
+                rb_delete(&commands_tree, vector_get(coms, j));
             }
         }
         //rb_tree_print(commands_tree, user_command_to_string,0);
         free(tokens);
         string_builder_destroy(file_line);
     }
-    close_file(&file, error);
+    close_file(file, error);
     string_builder_destroy(arg);
 }
 
@@ -190,8 +190,8 @@ void print_command(user_command *command, error_s *error) {
 }
 
 void clear_command(user_command *command, error_s *error) {
-    global_tree_clear();
     printf("%s\n", "Очищение дерева...");
+    global_tree_clear();
 }
 
 void d_command(user_command *command, error_s *error) {
@@ -204,7 +204,8 @@ void d_command(user_command *command, error_s *error) {
             return;
         }
         global_tree_delete(key);
-        rb_tree_delete(&commands_tree, new_object(command, IN_HEAP), command_char_arg_compare, user_command_destroy);
+        rb_tree_s *founded = rb_search(commands_tree, (void *) command, command_char_arg_compare);
+        rb_delete(&commands_tree, founded);
     }
 }
 
@@ -223,11 +224,13 @@ void run_command(user_command *command, error_s *error) {
 
 int command_char_arg_compare(void *com1, void *com2) {
     if (com1 != NULL && com2 != NULL) {
-        return string_builder_equals((((user_command *) com1)->arg), (((user_command *) com2)->arg));
+        string_builder *com1_arg = (((user_command *) com1)->arg);
+        string_builder *com2_arg = (((user_command *) com2)->arg);
+        return string_builder_equals(com1_arg, com2_arg);
     }
-    return 0;
+    return -1;
 }
 
-char *user_command_to_string(void *command) {
-    return string_builder_to_string((((user_command *) command)->arg));
+int user_command_print(FILE *stream, char *mode, void *command) {
+    return fprintf(stream, "Аргумент команды: %s", string_builder_get_string(((user_command *) command)->arg));
 }

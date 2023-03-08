@@ -3,6 +3,7 @@
 //
 
 #include "../../include/containers/rb_tree_s.h"
+#include "../../include/command/command.h"
 
 
 /**
@@ -10,475 +11,394 @@
  * */
 
 typedef struct rb_tree_s {
-    enum tree_color color;
+    int8_t color;
     rb_tree_s *p;
     rb_tree_s *left;
     rb_tree_s *right;
-    object_s *key;
+    object_s key;
 } rb_tree_s;
 
-void rb_tree_set_color(rb_tree_s *node, enum tree_color color) {
-    if (node != NULL) {
-        node->color = color;
+static rb_tree_s nil = {.p = NULL, .left = NULL, .right = NULL, .key = "\0", .color = BLACK};
+static rb_tree_s *EMPTY_TREE_NODE = &nil;
+
+rb_tree_s *new_rb_tree(object_s key) {
+    nil.p = EMPTY_TREE_NODE;
+    nil.left = EMPTY_TREE_NODE;
+    nil.right = EMPTY_TREE_NODE;
+    rb_tree_s *new_tree = malloc(sizeof(rb_tree_s));
+    if (new_tree) {
+        new_tree->color = BLACK;
+        new_tree->p = EMPTY_TREE_NODE;
+        new_tree->left = EMPTY_TREE_NODE;
+        new_tree->right = EMPTY_TREE_NODE;
+        new_tree->key = key;
+    }
+    return new_tree;
+}
+
+rb_tree_s *new_rb_node(object_s key) {
+    rb_tree_s *new_tree = malloc(sizeof(rb_tree_s));
+    if (new_tree) {
+        new_tree->color = BLACK;
+        new_tree->p = EMPTY_TREE_NODE;
+        new_tree->left = EMPTY_TREE_NODE;
+        new_tree->right = EMPTY_TREE_NODE;
+        new_tree->key = key;
+    }
+    return new_tree;
+}
+
+bool rb_is_empty(rb_tree_s *node) {
+    return (node == NULL || node == EMPTY_TREE_NODE);
+}
+
+void rb_destroy(void *node) {
+    if (!rb_is_empty(node)) {
+        rb_destroy(((rb_tree_s *) node)->right);
+        rb_destroy(((rb_tree_s *) node)->left);
+        free(node);
     }
 }
 
-void rb_tree_set_key(rb_tree_s *node, object_s *key) {
-    if (node != NULL) {
-        node->key = key;
-    }
+void rb_set_color(rb_tree_s *node, int8_t color) {
+    node->color = color;
 }
 
-void rb_tree_set_parent(rb_tree_s *node, rb_tree_s *parent) {
-    if (node != NULL) {
-        node->p = parent;
-    }
+void rb_set_key(rb_tree_s *node, object_s key) {
+    node->key = key;
 }
 
-void rb_tree_set_left(rb_tree_s *node, rb_tree_s *left) {
-    if (node != NULL) {
-        node->left = left;
-    }
+void rb_set_p(rb_tree_s *node, rb_tree_s *parent) {
+    node->p = parent;
 }
 
-void rb_tree_set_right(rb_tree_s *node, rb_tree_s *right) {
-    if (node != NULL) {
-        node->right = right;
-    }
+void rb_set_left(rb_tree_s *node, rb_tree_s *left) {
+    node->left = left;
 }
 
-object_s *rb_tree_get_key(rb_tree_s *node) {
-    if (node != NULL) {
-        return node->key;
-    }
-    return NULL;
+void rb_set_right(rb_tree_s *node, rb_tree_s *right) {
+    node->right = right;
 }
 
-enum tree_color rb_tree_get_color(rb_tree_s *node) {
-    if (node != NULL) {
-        return node->color;
-    }
-    return BLACK;
+object_s rb_key(rb_tree_s *node) {
+    return node->key;
 }
 
-rb_tree_s *rb_tree_get_parent(rb_tree_s *node) {
+int8_t rb_color(rb_tree_s *node) {
+    return node->color;
+}
+
+rb_tree_s *rb_parent(rb_tree_s *node) {
     if (node != NULL) {
         return node->p;
     }
     return NULL;
 }
 
-rb_tree_s *rb_tree_get_left(rb_tree_s *node) {
+rb_tree_s *rb_left(rb_tree_s *node) {
     if (node != NULL) {
         return node->left;
     }
     return NULL;
 }
 
-rb_tree_s *rb_tree_get_right(rb_tree_s *node) {
+rb_tree_s *rb_right(rb_tree_s *node) {
     if (node != NULL) {
         return node->right;
     }
     return NULL;
 }
 
-static rb_tree_s nil = {.p = NULL, .left = NULL, .right = NULL, .key = NULL, .color = BLACK};
-static rb_tree_s *T = &nil;
-
-rb_tree_s *new_rb_tree(object_s *key) {
-    nil.p = T;
-    nil.left = T;
-    nil.right = T;
-    rb_tree_s *new_tree = malloc(sizeof(rb_tree_s));
-    if (new_tree) {
-        new_tree->color = BLACK;
-        new_tree->p = T;
-        new_tree->left = T;
-        new_tree->right = T;
-        new_tree->key = key;
+void rb_inorder_print(FILE *stream, rb_tree_s *node, int printer(FILE *, char *mode, void *)) {
+    if (!rb_is_empty(node)) {
+        rb_inorder_print(stream, node->left, printer);
+        printer(stream, "%s", node->key);
+        rb_inorder_print(stream, node->right, printer);
     }
-    return new_tree;
 }
 
-static rb_tree_s *new_rb_tree_node(object_s *key) {
-    rb_tree_s *new_tree = malloc(sizeof(rb_tree_s));
-    if (new_tree) {
-        new_tree->color = BLACK;
-        new_tree->p = T;
-        new_tree->left = T;
-        new_tree->right = T;
-        new_tree->key = key;
+void rb_print(FILE *stream, rb_tree_s *root, int printer(FILE *, char *mode, void *), int depth) {
+    if (!rb_is_empty(root)) {
+        rb_print(stream, root->right, printer, depth + 1);
+        if (depth == 0) {
+            fprintf(stream, "----");
+            printer(stream, "", root->key);
+            fprintf(stream, "\n");
+        } else if (root->p->right == root) {
+            for (int i = 0; i < depth; i++) {
+                fprintf(stream, "     ");
+            }
+            fprintf(stream, "/---");
+            printer(stream, "", root->key);
+            fprintf(stream, "\n");
+        } else if (root->p->left == root) {
+            for (int i = 0; i < depth; i++) {
+                fprintf(stream, "     ");
+            }
+            fprintf(stream, "\\---");
+            printer(stream, "", root->key);
+            fprintf(stream, "\n");
+        }
+        rb_print(stream, root->left, printer, depth + 1);
     }
-    return new_tree;
 }
 
-rb_tree_s *rb_tree_search(rb_tree_s *node, object_s *key, int compare(void *, void *)) {
-    if (node != NULL) {
-        if (node == T || object_compare(key, node->key, compare) == 0) {
-            return node;
-        }
-        if (object_compare(key, node->key, compare) == -1) {
-            return rb_tree_search(node->left, key, compare);
-        } else {
-            return rb_tree_search(node->right, key, compare);
-        }
+rb_tree_s *rb_search(rb_tree_s *node, object_s target, int comparator(void *, void *)) {
+    if (rb_is_empty(node) || comparator(target, node->key) == 0) {
+        return node;
     }
-    return NULL;
+    if (comparator(target, node->key) == -1) {
+        return rb_search(node->left, target, comparator);
+    } else {
+        return rb_search(node->right, target, comparator);
+    }
 }
 
-rb_tree_s *rb_tree_maximum(rb_tree_s *root) {
-    if (root != NULL) {
-        while (root->right != T) {
-            root = root->right;
-        }
-        return root;
+rb_tree_s *rb_max(rb_tree_s *node) {
+    while (!rb_is_empty(node->right)) {
+        node = node->right;
     }
-    return NULL;
+    return node;
 }
 
-rb_tree_s *rb_tree_minimum(rb_tree_s *root) {
-    if (root != NULL) {
-        while (root->left != T) {
-            root = root->left;
-        }
-        return root;
+rb_tree_s *rb_min(rb_tree_s *node) {
+    while (!rb_is_empty(node->left)) {
+        node = node->left;
     }
-    return NULL;
+    return node;
 }
 
-rb_tree_s *rb_tree_predecessor(rb_tree_s *node) {
-    if (node->left != T) {
-        return rb_tree_minimum(node->left);
+rb_tree_s *rb_successor(rb_tree_s *node) {
+    if (!rb_is_empty(node->right)) {
+        return rb_min(node->right);
     }
-    rb_tree_s *y = node->p;
-    while (y != T && node == y->left) {
-        node = y;
-        y = y->p;
+    rb_tree_s *buf = node->p;
+    while (!rb_is_empty(buf)) {
+        if (node == buf->right) {
+            node = buf;
+            buf = buf->p;
+            continue;
+        }
+        break;
     }
-    return y;
+    return buf;
 }
 
-rb_tree_s *rb_tree_successor(rb_tree_s *node) {
-    if (node->right != T) {
-        return rb_tree_minimum(node->right);
+rb_tree_s *rb_predecessor(rb_tree_s *node) {
+    if (!rb_is_empty(node->left)) {
+        return rb_max(node->left);
     }
-    rb_tree_s *y = node->p;
-    while (y != T && node == y->right) {
-        node = y;
-        y = y->p;
+    rb_tree_s *buf = node->p;
+    while (!rb_is_empty(buf)) {
+        if (node == buf->left) {
+            node = buf;
+            buf = buf->p;
+            continue;
+        }
+        break;
     }
-    return y;
+    return buf;
 }
 
-static bool rb_tree_right_rotate(rb_tree_s **root, rb_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        rb_tree_s *y = x->left;
-        x->left = y->right;
-
-        if (y->right != T) {
-            y->right->p = x;
-        }
-        y->p = x->p;
-
-        if (x->p == T) {
-            *root = y;
-        } else if (x == x->p->right) {
-            x->p->right = y;
-        } else {
-            x->p->left = y;
-        }
-
-        y->right = x;
-        x->p = y;
-        return true;
+static void rb_left_rotate(rb_tree_s **root, rb_tree_s *x) {
+    rb_tree_s *y = x->right;
+    x->right = y->left;
+    if (!rb_is_empty(y->left)) {
+        y->left->p = x;
     }
-    return false;
+    y->p = x->p;
+    if (rb_is_empty(x->p)) {
+        *root = y;
+    } else if (x == x->p->left) {
+        x->p->left = y;
+    } else x->p->right = y;
+    y->left = x;
+    x->p = y;
 }
 
-static bool rb_tree_left_rotate(rb_tree_s **root, rb_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        rb_tree_s *y = x->right;
-        x->right = y->left;
-
-        if (y->left != T) {
-            y->left->p = x;
-        }
-        y->p = x->p;
-
-        if (x->p == T) {
-            *root = y;
-        } else if (x == x->p->left) {
-            x->p->left = y;
-        } else {
-            x->p->right = y;
-        }
-
-        y->left = x;
-        x->p = y;
-        return true;
+static void rb_right_rotate(rb_tree_s **root, rb_tree_s *x) {
+    rb_tree_s *y = x->left;
+    x->left = y->right;
+    if (!rb_is_empty(y->right)) {
+        y->right->p = x;
     }
-    return false;
+    y->p = x->p;
+    if (rb_is_empty(x->p)) {
+        *root = y;
+    } else if (x == x->p->right) {
+        x->p->right = y;
+    } else x->p->left = y;
+    y->right = x;
+    x->p = y;
 }
 
-static bool rb_tree_insert_fix(rb_tree_s **root, rb_tree_s *z) {
+static void rb_insert_fix(rb_tree_s **root, rb_tree_s *node) {
     rb_tree_s *y;
-    if (root != NULL && z != NULL) {
-        while (z->p->color == RED) {
-            if (z->p == z->p->p->left) {
-                y = z->p->p->right;
-                if (y->color == RED) {
-                    z->p->color = BLACK;
-                    y->color = BLACK;
-                    z->p->p->color = RED;
-                    z = z->p->p;
-                } else {
-                    if (z == z->p->right) {
-                        z = z->p;
-                        rb_tree_left_rotate(root, z);
-                    }
-                    z->p->color = BLACK;
-                    z->p->p->color = RED;
-                    rb_tree_right_rotate(root, z->p->p);
-                }
+    while (node->p->color == RED) {
+        if (node->p == node->p->p->left) {
+            y = node->p->p->right;
+            if (y->color == RED) {
+                node->p->color = BLACK;
+                y->color = BLACK;
+                node->p->p->color = RED;
+                node = node->p->p;
             } else {
-                y = z->p->p->left;
-                if (y->color == RED) {
-                    z->p->color = BLACK;
-                    y->color = BLACK;
-                    z->p->p->color = RED;
-                    z = z->p->p;
-                } else {
-                    if (z == z->p->left) {
-                        z = z->p;
-                        rb_tree_right_rotate(root, z);
-                    }
-                    z->p->color = BLACK;
-                    z->p->p->color = RED;
-                    rb_tree_left_rotate(root, z->p->p);
+                if (node == node->p->right) {
+                    node = node->p;
+                    rb_left_rotate(root, node);
                 }
+                node->p->color = BLACK;
+                node->p->p->color = RED;
+                rb_right_rotate(root, node->p->p);
+            }
+        } else {
+            y = node->p->p->left;
+            if (y->color == RED) {
+                node->p->color = BLACK;
+                y->color = BLACK;
+                node->p->p->color = RED;
+                node = node->p->p;
+            } else {
+                if (node == node->p->left) {
+                    node = node->p;
+                    rb_right_rotate(root, node);
+                }
+                node->p->color = BLACK;
+                node->p->p->color = RED;
+                rb_left_rotate(root, node->p->p);
             }
         }
-        (*root)->color = BLACK;
-        return true;
     }
-    return false;
+    (*root)->color = BLACK;
 }
 
-bool rb_tree_insert(rb_tree_s **root, object_s *key, int compare(void *, void *)) {
+bool rb_insert(rb_tree_s **root, rb_tree_s *z, int comparator(void *, void *)) {
     if (root != NULL) {
-        if (*root == NULL) {
-            return false;
-        }
-        rb_tree_s *z = new_rb_tree_node(key);
-        if (z == NULL) {
-            return false;
-        }
+        if (*root == NULL || z == NULL) return false;
         rb_tree_s *x = *root;
-        rb_tree_s *y = T;
-        while (x != T) {
+        rb_tree_s *y = EMPTY_TREE_NODE;
+        while (!rb_is_empty(x)) {
             y = x;
-            if (object_compare(z->key, x->key, compare) == -1) {
-                x = x->left;
-            } else {
-                x = x->right;
-            }
+            if (comparator(z->key, x->key) == -1) x = x->left;
+            else x = x->right;
         }
         z->p = y;
-        if (y == T) {
+        if (rb_is_empty(y)) {
             *root = z;
-        } else if (object_compare(z->key, y->key, compare) == -1) {
-            y->left = z;
-        } else {
-            y->right = z;
-        }
-        z->left = T;
-        z->right = T;
+        } else if (comparator(z->key, y->key) == -1) y->left = z;
+        else y->right = z;
+        z->left = EMPTY_TREE_NODE;
+        z->right = EMPTY_TREE_NODE;
         z->color = RED;
-        return rb_tree_insert_fix(root, z);
-    }
-    return false;
-}
-
-static bool rb_tree_transplant(rb_tree_s **root, rb_tree_s *from, rb_tree_s *to) {
-    if (root != NULL && to != NULL && from != NULL) {
-        if (*root != NULL) {
-            if (from->p == T) {
-                (*root) = to;
-            } else if (from == from->p->left) {
-                from->p->left = to;
-            } else {
-                from->p->right = to;
-            }
-            to->p = from->p;
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
-
-static bool rb_tree_delete_fix(rb_tree_s **root, rb_tree_s *x) {
-    if (root != NULL && x != NULL) {
-        if (*root != NULL) {
-            rb_tree_s *w;
-            while ((x != *root) && (x->color == BLACK)) {
-                if (x == x->p->left) {
-                    w = x->p->right;
-                    if (w->color == RED) {
-                        w->color = BLACK;
-                        x->p->color - RED;
-                        rb_tree_left_rotate(root, x->p);
-                        w = x->p->right;
-                    }
-                    if ((w->left->color == BLACK) && (w->right->color == BLACK)) {
-                        w->color = RED;
-                        x = x->p;
-                    } else {
-                        if (w->right->color == BLACK) {
-                            w->left->color = BLACK;
-                            w->color = RED;
-                            rb_tree_right_rotate(root, w);
-                            w = x->p->right;
-                        }
-                        w->color = x->p->color;
-                        x->p->color = BLACK;
-                        x->right->color = BLACK;
-                        rb_tree_left_rotate(root, x->p);
-                        x = *root;
-                    }
-                } else {
-                    w = x->p->left;
-                    if (w->color == RED) {
-                        w->color = BLACK;
-                        x->p->color = RED;
-                        rb_tree_right_rotate(root, x->p);
-                        w = x->p->left;
-                    }
-                    if ((w->right->color == BLACK) && (w->left->color == BLACK)) {
-                        w->color = RED;
-                        x = x->p;
-                    } else {
-                        if (w->left->color == BLACK) {
-                            w->right->color = BLACK;
-                            w->color = RED;
-                            rb_tree_left_rotate(root, w);
-                            w = x->p->left;
-                        }
-                        w->color = x->p->color;
-                        x->p->color = BLACK;
-                        w->left->color = BLACK;
-                        rb_tree_right_rotate(root, x->p);
-                        x = *root;
-                    }
-                }
-            }
-            x->color = BLACK;
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
-
-bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *), void (*destroyer)(void *)) {
-    rb_tree_s *z = rb_tree_search(*root, key, compare);
-    if (root != NULL && z != NULL) {
-        if (*root != NULL) {
-            rb_tree_s *x;
-            rb_tree_s *y = z;
-            enum tree_color y_original_color = y->color;
-            if (z->left == T) {
-                x = z->right;
-                rb_tree_transplant(root, z, z->right);
-            } else if (z->right == T) {
-                x = z->left;
-                rb_tree_transplant(root, z, z->left);
-            } else {
-                y = (*root);
-                while (y->left != T) {
-                    y = y->left;
-                }
-                y_original_color = y->color;
-                x = y->right;
-                if (y != z->right) {
-                    rb_tree_transplant(root, y, y->right);
-                    y->right = z->right;
-                    y->right->p = y;
-                } else {
-                    x->p = y;
-                }
-                rb_tree_transplant(root, z, y);
-                y->left = z->left;
-                y->left->p = y;
-                y->color = z->color;
-                object_destroy(z->key, destroyer);
-                free(z);
-            }
-            if (y_original_color == BLACK) {
-                rb_tree_delete_fix(root, x);
-            }
-        }
+        rb_insert_fix(root, z);
         return true;
     }
     return false;
 }
 
-void rb_tree_print(rb_tree_s *node, char *(to_string)(void *), int depth) {
-    if (node != T && node != NULL) {
-        rb_tree_print(node->right, to_string, depth + 1);
-        if (depth == 0) {
-            printf("----%s\n", object_to_string(node->key, to_string));
-        } else if (node->p->right == node) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("/---%s\n", object_to_string(node->key, to_string));
-        } else if (node->p->left == node) {
-            for (int i = 0; i < depth; i++) {
-                printf("     ");
-            }
-            printf("\\---%s\n", object_to_string(node->key, to_string));
-        }
-        rb_tree_print(node->left, to_string, depth + 1);
-    } else {
-        return;
-    }
+static void rb_transplant(rb_tree_s **root, rb_tree_s *u, rb_tree_s *v) {
+    if (rb_is_empty(u->p)) {
+        *root = v;
+    } else if (u == u->p->left) {
+        u->p->left = v;
+    } else u->p->right = v;
+    v->p = u->p;
 }
 
-void rb_tree_print_to(FILE *stream, rb_tree_s *node, char *(to_string)(void *), int depth) {
-    if (node != T && node != NULL) {
-        rb_tree_print_to(stream, node->right, to_string, depth + 1);
-        if (depth == 0) {
-            fprintf(stream, "----%s\n", object_to_string(node->key, to_string));
-        } else if (node->p->right == node) {
-            for (int i = 0; i < depth; i++) {
-                fprintf(stream, "     ");
+static void rb_delete_fix(rb_tree_s **root, rb_tree_s *x) {
+    while (x != *root && x->color == BLACK) {
+        rb_tree_s *w;
+        if (x == x->p->left) {
+            w = x->p->right;
+            if (w->color == RED) {
+                w->color = BLACK;
+                x->p->color = RED;
+                rb_left_rotate(root, x->p);
+                w = x->p->right;
             }
-            fprintf(stream, "/---%s\n", object_to_string(node->key, to_string));
-        } else if (node->p->left == node) {
-            for (int i = 0; i < depth; i++) {
-                fprintf(stream, "     ");
+            if (w->left->color == BLACK && w->right->color == BLACK) {
+                w->color = RED;
+                x = x->p;
+            } else {
+                if (w->right->color == BLACK) {
+                    w->left->color = BLACK;
+                    w->color = RED;
+                    rb_right_rotate(root, w);
+                    w = x->p->right;
+                }
+                w->color = x->p->color;
+                x->p->color = BLACK;
+                w->right->color = BLACK;
+                rb_left_rotate(root, x->p);
+                x = *root;
             }
-            fprintf(stream, "\\---%s\n", object_to_string(node->key, to_string));
+        } else {
+            w = x->p->left;
+            if (w->color == RED) {
+                w->color = BLACK;
+                x->p->color = RED;
+                rb_right_rotate(root, x->p);
+                w = x->p->left;
+            }
+            if (w->right->color == BLACK && w->left->color == BLACK) {
+                w->color = RED;
+                x = x->p;
+            } else {
+                if (w->left->color == BLACK) {
+                    w->right->color = BLACK;
+                    w->color = RED;
+                    rb_left_rotate(root, w);
+                    w = x->p->left;
+                }
+                w->color = x->p->color;
+                x->p->color = BLACK;
+                w->left->color = BLACK;
+                rb_right_rotate(root, x->p);
+                x = *root;
+            }
         }
-        rb_tree_print_to(stream, node->left, to_string, depth + 1);
-    } else {
-        return;
     }
+    x->color = BLACK;
 }
 
+bool rb_delete(rb_tree_s **root, rb_tree_s *z) {
+    if (!rb_is_empty(*root) && !rb_is_empty(z)) {
+        rb_tree_s *x;
+        rb_tree_s *y = z;
+        int8_t y_original_color = y->color;
+        if (rb_is_empty(z->left)) {
+            x = z->right;
+            rb_transplant(root, z, z->right);
+        } else if (rb_is_empty(z->right)) {
+            x = z->left;
+            rb_transplant(root, z, z->left);
+        } else {
+            y = rb_min(z->right);
+            y_original_color = y->color;
+            x = y->right;
+            if (y != z->right) {
+                rb_transplant(root, y, y->right);
+                y->right = z->right;
+                y->right->p = y;
+            } else x->p = y;
+            rb_transplant(root, z, y);
+            y->left = z->left;
+            y->left->p = y;
+            y->color = z->color;
+        }
+        if (y_original_color == BLACK) {
+            rb_delete_fix(root, x);
+        }
+        free(z);
+        return true;
+    }
+    return false;
+}
 
-void rb_tree_destroy(rb_tree_s *node, void (*destroyer)(void *)) {
-    if (node != NULL && node != T) {
-        rb_tree_destroy(node->right, destroyer);
-        rb_tree_destroy(node->left, destroyer);
-        object_destroy(node->key, destroyer);
-        free(node);
+void rb_foreach_free(rb_tree_s *node, void (func)(void *)) {
+    if (!rb_is_empty(node)) {
+        rb_foreach_free(node->right, func);
+        rb_foreach_free(node->left, func);
+        free(node->key);
     }
 }

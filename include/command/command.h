@@ -70,6 +70,6 @@ void exit_command(user_command *command, error_s *error);
 
 int command_char_arg_compare(void *com1, void *com2);
 
-char *user_command_to_string(void *command);
+int user_command_print(FILE *stream, char *mode, void *command);
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_COMMAND_H

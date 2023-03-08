@@ -43,8 +43,8 @@ static char *open_file_modes[MODES_COUNTS] = {
         "w+t", "a+t"
 };
 
-void open_file(FILE **stream, char *filename, enum open_file_modes mode, error_s *error);
+FILE *open_file(char *filename, enum open_file_modes mode, error_s *error);
 
-void close_file(FILE **stream, error_s *error);
+void close_file(FILE *stream, error_s *error);
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_IO_HANDLER_H

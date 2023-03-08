@@ -44,7 +44,7 @@ string_builder *read_line(FILE *stream, error_s *error) {
 
 user_command *get_user_command_from_vector(vector_s *tokens) {
     user_command *command = new_user_command(NULL, NULL);
-    string_builder *name = object_get_value(vector_get(tokens, 0));
+    string_builder *name = (string_builder *) vector_get(tokens, 0);
     if (vector_get_size(tokens) == 1) {
         if (!strcmp(string_builder_get_string(name), "help")) {
             user_command_set_callback(command, help_command);
@@ -74,13 +74,13 @@ user_command *get_user_command_from_vector(vector_s *tokens) {
         user_command_set_callback(command, undefined_command);
         return command;
     }
-    user_command_set_arg(command, object_get_value(vector_get(tokens, 1)));
+    user_command_set_arg(command, vector_get(tokens, 1));
     return command;
 }
 
 user_command *parse_and_set_tree_command(vector_s *vector, size_t index) {
     if (index < vector_get_size(vector)) {
-        string_builder *name = object_get_value(vector_get(vector, index));
+        string_builder *name = (string_builder *) vector_get(vector, index);
         user_command *command;
         if (!strcmp(string_builder_get_string(name), "n")) {
             command = new_user_command(NULL, NULL);
@@ -98,7 +98,7 @@ user_command *parse_and_set_tree_command(vector_s *vector, size_t index) {
             command = NULL;
             return command;
         }
-        user_command_set_arg(command, object_get_value(vector_get(vector, index + 1)));
+        user_command_set_arg(command, vector_get(vector, index + 1));
         return command;
     }
     return NULL;
@@ -125,15 +125,13 @@ bool console(error_s *error) {
                 string_builder_destroy(line);
                 break;
             } else if (user_command_get_callback(command) == k_command) {
-                object_s *key = new_object(command, IN_HEAP);
-                if (commands_tree == NULL) {
-                    commands_tree = new_rb_tree(key);
+                if (rb_is_empty(commands_tree)) {
+                    commands_tree = new_rb_tree(command);
                     run_command(command, error);
                 } else {
-                    //rb_tree_print(commands_tree, user_command_to_string,0);
-                    rb_tree_s *buf = rb_tree_search(commands_tree, key, command_char_arg_compare);
-                    if (rb_tree_get_key(buf) == NULL) {
-                        rb_tree_insert(&commands_tree, key, command_char_arg_compare);
+                    rb_tree_s *buf = rb_search(commands_tree, command, command_char_arg_compare);
+                    if (rb_is_empty(buf)) {
+                        rb_insert(&commands_tree, new_rb_node(command), command_char_arg_compare);
                         run_command(command, error);
                     } else {
                         printf("Такое число уже есть в дереве.\n");
@@ -152,19 +150,17 @@ bool console(error_s *error) {
                     user_command *command = parse_and_set_tree_command(tokens_vector, i);
                     if (command == NULL) {
                         printf("Некорректная команда.\n");
-                        rb_tree_destroy(commands_tree, user_command_destroy);
-                        commands_tree = NULL;
+                        user_command_destroy(command);
                         break;
                     }
                     if (user_command_get_callback(command) == k_command) {
-                        object_s *key = new_object(command, IN_HEAP);
-                        //rb_tree_print(commands_tree, user_command_to_string,0);
-                        rb_tree_s *buf = rb_tree_search(commands_tree, key, command_char_arg_compare);
-                        if (rb_tree_get_key(buf) == NULL) {
-                            if (commands_tree == NULL) {
+                        object_s key = command;
+                        rb_tree_s *buf = rb_search(commands_tree, key, command_char_arg_compare);
+                        if (rb_is_empty(buf)) {
+                            if (rb_is_empty(commands_tree)) {
                                 commands_tree = new_rb_tree(key);
                             } else {
-                                rb_tree_insert(&commands_tree, key, command_char_arg_compare);
+                                rb_insert(&commands_tree, new_rb_node(key), command_char_arg_compare);
                             }
                             vector_push(coms, key);
                         } else {
@@ -173,23 +169,24 @@ bool console(error_s *error) {
                             break;
                         }
                     } else {
-                        object_s *key = new_object(command, IN_HEAP);
+                        object_s key = command;
                         vector_push(coms, key);
                     }
                 }
-                if (commands_tree != NULL) {
+                if (!rb_is_empty(commands_tree)) {
                     for (size_t j = 0; j < vector_get_size(coms); j++) {
-                        run_command(object_get_value(vector_get(coms, j)), error);
+                        run_command(vector_get(coms, j), error);
                     }
                 } else {
                     for (size_t j = 0; j < vector_get_size(coms); j++) {
-                        rb_tree_delete(&commands_tree, object_get_value(vector_get(coms, j)),
-                                       command_char_arg_compare, user_command_destroy);
+                        rb_tree_s *node = rb_search(commands_tree, vector_get(coms, j), command_char_arg_compare);
+                        rb_delete(&commands_tree, node);
+                        user_command_destroy(vector_get(coms, j));
                     }
                 }
             }
             for (size_t i = 0; i < vector_get_size(tokens_vector); i += 2) {
-                user_command *command = object_get_value(vector_get(tokens_vector, i));
+                user_command *command = vector_get(tokens_vector, i);
                 if (user_command_get_callback(command) != k_command) {
                     user_command_destroy(command);
                 }
@@ -198,7 +195,8 @@ bool console(error_s *error) {
             string_builder_destroy(line);
         }
     }
-    rb_tree_destroy(commands_tree, user_command_destroy);
+    rb_foreach_free(commands_tree, user_command_destroy);
+    rb_destroy(commands_tree);
     commands_tree = NULL;
     return true;
 }

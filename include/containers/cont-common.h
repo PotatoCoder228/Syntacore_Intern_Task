@@ -4,10 +4,13 @@
 
 #ifndef SYNTACORE_TOOLS_INTERN_TASK_CONT_COMMON_H
 #define SYNTACORE_TOOLS_INTERN_TASK_CONT_COMMON_H
-enum tree_color {
-    BLACK = 0,
-    RED
-};
+
+#include "stdint.h"
+
+static const int8_t BLACK = 0;
+static const int8_t RED = 1;
+
+typedef void *object_s;
 
 enum vector_consts {
     VECTOR_INIT_CAPACITY = 10

@@ -7,44 +7,57 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../object/object.h"
+#include <stdbool.h>
 #include "cont-common.h"
-
 
 typedef struct rb_tree_s rb_tree_s;
 
-rb_tree_s *new_rb_tree(object_s *key);
+rb_tree_s *new_rb_tree(object_s key);
 
-bool rb_tree_insert(rb_tree_s **root, object_s *key, int compare(void *, void *));
+rb_tree_s *new_rb_node(object_s key);
 
-bool rb_tree_delete(rb_tree_s **root, object_s *key, int compare(void *, void *), void (*destroyer)(void *));
+void rb_destroy(void *node);
 
-rb_tree_s *rb_tree_search(rb_tree_s *node, object_s *key, int compare(void *, void *));
+bool rb_is_empty(rb_tree_s *node);
 
-void rb_tree_set_color(rb_tree_s *node, enum tree_color color);
+void rb_set_color(rb_tree_s *node, int8_t color);
 
-void rb_tree_set_key(rb_tree_s *node, object_s *key);
+void rb_set_key(rb_tree_s *node, object_s key);
 
-void rb_tree_set_parent(rb_tree_s *node, rb_tree_s *parent);
+void rb_set_p(rb_tree_s *node, rb_tree_s *parent);
 
-void rb_tree_set_left(rb_tree_s *node, rb_tree_s *left);
+void rb_set_left(rb_tree_s *node, rb_tree_s *left);
 
-void rb_tree_set_right(rb_tree_s *node, rb_tree_s *right);
+void rb_set_right(rb_tree_s *node, rb_tree_s *right);
 
-object_s *rb_tree_get_key(rb_tree_s *node);
+object_s rb_key(rb_tree_s *node);
 
-enum tree_color rb_tree_get_color(rb_tree_s *node);
+int8_t rb_color(rb_tree_s *node);
 
-rb_tree_s *rb_tree_get_parent(rb_tree_s *node);
+rb_tree_s *rb_parent(rb_tree_s *node);
 
-rb_tree_s *rb_tree_get_left(rb_tree_s *node);
+rb_tree_s *rb_left(rb_tree_s *node);
 
-rb_tree_s *rb_tree_get_right(rb_tree_s *node);
+rb_tree_s *rb_right(rb_tree_s *node);
 
-void rb_tree_print(rb_tree_s *node, char *(to_string)(void *), int depth);
+void rb_inorder_print(FILE *stream, rb_tree_s *node, int printer(FILE *, char *mode, void *));
 
-void rb_tree_print_to(FILE *stream, rb_tree_s *node, char *(to_string)(void *), int depth);
+void rb_print(FILE *stream, rb_tree_s *root, int printer(FILE *, char *mode, void *), int depth);
 
-void rb_tree_destroy(rb_tree_s *node, void (*destroyer)(void *));
+rb_tree_s *rb_search(rb_tree_s *node, object_s target, int comparator(void *, void *));
+
+rb_tree_s *rb_max(rb_tree_s *node);
+
+rb_tree_s *rb_min(rb_tree_s *node);
+
+rb_tree_s *rb_successor(rb_tree_s *node);
+
+rb_tree_s *rb_predecessor(rb_tree_s *node);
+
+bool rb_insert(rb_tree_s **root, rb_tree_s *z, int comparator(void *, void *));
+
+bool rb_delete(rb_tree_s **root, rb_tree_s *z);
+
+void rb_foreach_free(rb_tree_s *node, void (func)(void *));
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_RB_TREE_S_H

@@ -6,7 +6,7 @@
 
 
 typedef struct vector_s {
-    object_s **objects;
+    object_s *objects;
     size_t capacity;
     size_t size;
 } vector_s;
@@ -14,7 +14,7 @@ typedef struct vector_s {
 vector_s *new_vector() {
     vector_s *new_vector = malloc(sizeof(vector_s));
     if (new_vector) {
-        new_vector->objects = malloc(sizeof(object_s *) * VECTOR_INIT_CAPACITY);
+        new_vector->objects = malloc(sizeof(object_s) * VECTOR_INIT_CAPACITY);
         if (new_vector->objects) {
             new_vector->capacity = VECTOR_INIT_CAPACITY;
         }
@@ -24,7 +24,7 @@ vector_s *new_vector() {
 }
 
 bool vector_resize(vector_s *vector, size_t capacity) {
-    object_s **objects = realloc(vector->objects, sizeof(object_s *) * capacity);
+    object_s *objects = realloc(vector->objects, sizeof(object_s) * capacity);
     if (objects) {
         vector->objects = objects;
         vector->capacity = capacity;
@@ -33,7 +33,7 @@ bool vector_resize(vector_s *vector, size_t capacity) {
     return false;
 }
 
-object_s **vector_get_objects(vector_s *vector) {
+object_s *vector_get_objects(vector_s *vector) {
     if (vector != NULL) {
         return vector->objects;
     }
@@ -54,7 +54,7 @@ size_t vector_get_capacity(vector_s *vector) {
     return 0;
 }
 
-bool vector_push(vector_s *vector, object_s *object) {
+bool vector_push(vector_s *vector, object_s object) {
     if (vector != NULL && object != NULL) {
         bool stat;
         if (vector->size == vector->capacity) {
@@ -70,7 +70,7 @@ bool vector_push(vector_s *vector, object_s *object) {
     return false;
 }
 
-object_s *vector_pop(vector_s *vector) {
+object_s vector_pop(vector_s *vector) {
     if (vector != NULL && vector->size > 0) {
         if (vector->capacity == VECTOR_INIT_CAPACITY) {
             (vector->size)--;
@@ -86,7 +86,7 @@ object_s *vector_pop(vector_s *vector) {
     return NULL;
 }
 
-bool vector_set(vector_s *vector, object_s *object, size_t index) {
+bool vector_set(vector_s *vector, object_s object, size_t index) {
     if (vector != NULL) {
         if (index < vector->size) {
             vector->objects[index] = object;
@@ -97,7 +97,7 @@ bool vector_set(vector_s *vector, object_s *object, size_t index) {
     return false;
 }
 
-object_s *vector_get(vector_s *vector, size_t index) {
+object_s vector_get(vector_s *vector, size_t index) {
     if (vector != NULL) {
         if (index < vector->size) {
             return vector->objects[index];
@@ -107,7 +107,7 @@ object_s *vector_get(vector_s *vector, size_t index) {
     return NULL;
 }
 
-bool vector_delete(vector_s *vector, size_t index, void (*destroyer)(void *)) {
+bool vector_delete(vector_s *vector, size_t index, void (*destroy)(void *)) {
     if (vector != NULL) {
         if (index < vector->size) {
             object_s *trash = vector->objects[index];
@@ -118,7 +118,7 @@ bool vector_delete(vector_s *vector, size_t index, void (*destroyer)(void *)) {
             if ((vector->size < vector->capacity) && (vector->size > VECTOR_INIT_CAPACITY)) {
                 vector_resize(vector, vector->capacity - 25);
             }
-            object_destroy(trash, destroyer);
+            destroy(trash);
             return true;
         }
         return false;
@@ -127,24 +127,16 @@ bool vector_delete(vector_s *vector, size_t index, void (*destroyer)(void *)) {
 }
 
 void vector_foreach(vector_s *vector, callback f) {
-    for (int i = 0; i < vector_get_size(vector); i++) f(object_get_value(vector_get(vector, i)));
+    for (int i = 0; i < vector_get_size(vector); i++) f(vector_get(vector, i));
 }
 
 void vector_destroy(vector_s *vector, void (*destroyer)(void *)) {
-    for (size_t i = 0; i < vector->size; i++) {
-        object_destroy(vector->objects[i], destroyer);
-    }
+    free(vector->objects);
     free(vector);
 }
 
-void vector_print(vector_s *vector, char *(to_string)(void *)) {
+void vector_print(FILE *stream, vector_s *vector, int (printer)(FILE *, char *mode, void *)) {
     for (size_t i = 0; i < vector->size; i++) {
-        printf("{%s} ", object_to_string(vector->objects[i], to_string));
-    }
-}
-
-void vector_print_to(FILE *stream, vector_s *vector, char *(to_string)(void *)) {
-    for (size_t i = 0; i < vector->size; i++) {
-        fprintf(stream, "{%s} ", object_to_string(vector->objects[i], to_string));
+        printer(stream, " ", vector->objects[i]);
     }
 }

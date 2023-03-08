@@ -8,8 +8,7 @@ add_executable(Syntacore_Tools_Intern_Task
         include/command/command.h src/console/console.c
         include/console/console.h src/containers/os_tree_s.c
         include/containers/os_tree_s.h src/containers/rb_tree_s.c
-        include/containers/rb_tree_s.h src/object/object.c
-        include/object/object.h src/containers/list_s.c
+        include/containers/rb_tree_s.h src/containers/list_s.c
         include/containers/list_s.h
         include/containers/containers.h
         src/app.c
@@ -23,4 +22,4 @@ add_executable(Syntacore_Tools_Intern_Task
         src/string/string_builder.c
         include/string/string_builder.h
         src/io/io_handler.c
-        include/io/io_handler.h)
+        include/io/io_handler.h src/tests/os_tree_test.c)
