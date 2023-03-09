@@ -76,4 +76,13 @@ size_t os_find_less_than(os_tree_s *root, int64_t num);
 
 void os_inorder_print(FILE *stream, os_tree_s *node);
 
+os_tree_s *os_start(os_tree_s *root);
+
+bool os_has_next(os_tree_s *node);
+
+os_tree_s *os_next(os_tree_s *node);
+
+os_tree_s *os_end(os_tree_s *root);
+
+
 #endif //SYNTACORE_TOOLS_INTERN_TASK_OS_TREE_S_H

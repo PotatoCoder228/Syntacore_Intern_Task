@@ -161,8 +161,8 @@ object_s *list_get(list_s *node, size_t index) {
     if (node == NULL) {
         return NULL;
     }
-    size_t list_size = list_size(node);
-    if (index > list_size) {
+    size_t size = list_size(node);
+    if (index > size) {
         return NULL;
     }
     for (size_t i = 0; i < index; i++) {
@@ -191,8 +191,8 @@ bool list_insert(list_s **node, size_t index, object_s object) {
     if (node == NULL) {
         return false;
     }
-    size_t list_size = list_size(*node);
-    if (index > list_size) {
+    size_t size = list_size(*node);
+    if (index > size) {
         return false;
     }
     list_s *new_node = new_list_node();
