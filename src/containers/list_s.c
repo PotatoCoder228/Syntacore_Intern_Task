@@ -9,7 +9,7 @@ typedef struct list_s {
     list_s *next;
 } list_s;
 
-object_s *list_get_object(list_s *list) {
+object_s *list_object(list_s *list) {
     if (list != NULL) {
         return list->object;
     }
@@ -20,7 +20,7 @@ void list_set_object(list_s *list, object_s object) {
     list->object = object;
 }
 
-list_s *list_get_next(list_s *list) {
+list_s *list_next(list_s *list) {
     if (list != NULL) {
         return list->next;
     }
@@ -77,18 +77,6 @@ list_s *list_get_last_node(list_s *node) {
             node = node->next;
         }
         return prev_node;
-    }
-    return NULL;
-}
-
-object_s *list_get_last_value(list_s *node) {
-    if (node != NULL) {
-        list_s *prev_node = node;
-        while (node != NULL) {
-            prev_node = node;
-            node = node->next;
-        }
-        return prev_node->object;
     }
     return NULL;
 }
@@ -160,7 +148,7 @@ bool list_add_first(list_s **node, object_s object) {
     return true;
 }
 
-size_t list_get_size(list_s *node) {
+size_t list_size(list_s *node) {
     size_t counter = 0;
     while (node != NULL) {
         counter += 1;
@@ -173,7 +161,7 @@ object_s *list_get(list_s *node, size_t index) {
     if (node == NULL) {
         return NULL;
     }
-    size_t list_size = list_get_size(node);
+    size_t list_size = list_size(node);
     if (index > list_size) {
         return NULL;
     }
@@ -203,7 +191,7 @@ bool list_insert(list_s **node, size_t index, object_s object) {
     if (node == NULL) {
         return false;
     }
-    size_t list_size = list_get_size(*node);
+    size_t list_size = list_size(*node);
     if (index > list_size) {
         return false;
     }
@@ -227,9 +215,11 @@ bool list_insert(list_s **node, size_t index, object_s object) {
 }
 
 void list_foreach(list_s *list, callback iter_func) {
+    list_s *buf = list;
     while (list != NULL) {
+        buf = list;
         iter_func(list);
-        list = list->next;
+        list = buf->next;
     }
 }
 

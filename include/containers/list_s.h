@@ -12,11 +12,11 @@
 
 typedef struct list_s list_s;
 
-object_s *list_get_object(list_s *list);
+object_s *list_object(list_s *list);
 
 void list_set_object(list_s *list, object_s object);
 
-list_s *list_get_next(list_s *list);
+list_s *list_next(list_s *list);
 
 void list_set_next(list_s *list, list_s *next);
 
@@ -30,8 +30,6 @@ list_s *new_list(object_s object);
 
 list_s *list_get_last_node(list_s *node);
 
-object_s *list_get_last_value(list_s *node);
-
 bool list_push(list_s *node, object_s object);
 
 object_s *list_pop(list_s *node);
@@ -40,7 +38,7 @@ bool list_add_last(list_s *node, object_s object);
 
 bool list_add_first(list_s **node, object_s object);
 
-size_t list_get_size(list_s *node);
+size_t list_size(list_s *node);
 
 object_s *list_get(list_s *node, size_t index);
 

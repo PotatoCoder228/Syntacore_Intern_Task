@@ -45,7 +45,7 @@ string_builder *read_line(FILE *stream, error_s *error) {
 user_command *get_user_command_from_vector(vector_s *tokens) {
     user_command *command = new_user_command(NULL, NULL);
     string_builder *name = (string_builder *) vector_get(tokens, 0);
-    if (vector_get_size(tokens) == 1) {
+    if (vector_size(tokens) == 1) {
         if (!strcmp(string_builder_get_string(name), "help")) {
             user_command_set_callback(command, help_command);
         } else if (!strcmp(string_builder_get_string(name), "exit")) {
@@ -79,7 +79,7 @@ user_command *get_user_command_from_vector(vector_s *tokens) {
 }
 
 user_command *parse_and_set_tree_command(vector_s *vector, size_t index) {
-    if (index < vector_get_size(vector)) {
+    if (index < vector_size(vector)) {
         string_builder *name = (string_builder *) vector_get(vector, index);
         user_command *command;
         if (!strcmp(string_builder_get_string(name), "n")) {
@@ -117,14 +117,14 @@ bool console(error_s *error) {
             printf("Вы не ввели команду. Попробуйте снова.\n");
             string_builder_destroy(line);
             continue;
-        } else if (vector_get_size(tokens_vector) < 3) {
+        } else if (vector_size(tokens_vector) < 3) {
             user_command *command = get_user_command_from_vector(tokens_vector);
-            if (user_command_get_callback(command) == exit_command) {
+            if (user_command_callback(command) == exit_command) {
                 run_command(command, error);
                 vector_destroy(tokens_vector, string_builder_destroy);
                 string_builder_destroy(line);
                 break;
-            } else if (user_command_get_callback(command) == k_command) {
+            } else if (user_command_callback(command) == k_command) {
                 if (rb_is_empty(commands_tree)) {
                     commands_tree = new_rb_tree(command);
                     run_command(command, error);
@@ -142,18 +142,18 @@ bool console(error_s *error) {
             }
             string_builder_destroy(line);
         } else {
-            if (vector_get_size(tokens_vector) % 2 != 0) {
+            if (vector_size(tokens_vector) % 2 != 0) {
                 printf("Число команд не соответствует числу аргументов\n");
             } else {
                 vector_s *coms = new_vector();
-                for (size_t i = 0; i < vector_get_size(tokens_vector); i += 2) {
+                for (size_t i = 0; i < vector_size(tokens_vector); i += 2) {
                     user_command *command = parse_and_set_tree_command(tokens_vector, i);
                     if (command == NULL) {
                         printf("Некорректная команда.\n");
                         user_command_destroy(command);
                         break;
                     }
-                    if (user_command_get_callback(command) == k_command) {
+                    if (user_command_callback(command) == k_command) {
                         object_s key = command;
                         rb_tree_s *buf = rb_search(commands_tree, key, command_char_arg_compare);
                         if (rb_is_empty(buf)) {
@@ -174,20 +174,20 @@ bool console(error_s *error) {
                     }
                 }
                 if (!rb_is_empty(commands_tree)) {
-                    for (size_t j = 0; j < vector_get_size(coms); j++) {
+                    for (size_t j = 0; j < vector_size(coms); j++) {
                         run_command(vector_get(coms, j), error);
                     }
                 } else {
-                    for (size_t j = 0; j < vector_get_size(coms); j++) {
+                    for (size_t j = 0; j < vector_size(coms); j++) {
                         rb_tree_s *node = rb_search(commands_tree, vector_get(coms, j), command_char_arg_compare);
                         rb_delete(&commands_tree, node);
                         user_command_destroy(vector_get(coms, j));
                     }
                 }
             }
-            for (size_t i = 0; i < vector_get_size(tokens_vector); i += 2) {
+            for (size_t i = 0; i < vector_size(tokens_vector); i += 2) {
                 user_command *command = vector_get(tokens_vector, i);
-                if (user_command_get_callback(command) != k_command) {
+                if (user_command_callback(command) != k_command) {
                     user_command_destroy(command);
                 }
             }

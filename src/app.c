@@ -26,41 +26,43 @@ bool global_tree_init(int64_t key) {
 
 bool global_tree_insert(int64_t key) {
     if (global_tree != NULL) {
-        os_tree_insert(&global_tree, new_os_tree_node(key));
+        os_insert(&global_tree, new_os_tree_node(key));
         return true;
     }
     return false;
 }
 
+
 void global_tree_print() {
-    os_tree_print(global_tree, 0);
+    os_print(global_tree, 0);
+    printf("Элементы в порядке возрастания:\n");
     os_inorder_print(stdout, global_tree);
 }
 
 int64_t global_tree_k_stat(size_t i) {
     if (global_tree != NULL) {
-        return os_tree_get_key(os_tree_select(global_tree, i));
+        return os_key(os_select(global_tree, i));
     }
     return 0;
 }
 
 size_t global_tree_counts_less_than(int64_t k) {
-    return os_tree_find_less_than(global_tree, k);
+    return os_find_less_than(global_tree, k);
 }
 
 void global_tree_delete(int64_t num) {
-    os_tree_s *founded = os_tree_search(global_tree, num);
-    if (os_tree_node_is_empty(founded)) {
+    os_tree_s *founded = os_search(global_tree, num);
+    if (os_node_is_empty(founded)) {
         printf("Элемент отсутствует в дереве.\n");
     } else {
-        os_tree_delete(&global_tree, founded);
+        os_delete(&global_tree, founded);
     }
 }
 
 void global_tree_clear() {
-    if (!os_tree_node_is_empty(global_tree)) {
-        while (!os_tree_node_is_empty(global_tree)) {
-            os_tree_delete(&global_tree, global_tree);
+    if (!os_node_is_empty(global_tree)) {
+        while (!os_node_is_empty(global_tree)) {
+            os_delete(&global_tree, global_tree);
             rb_delete(&commands_tree, commands_tree);
         }
     } else {
@@ -70,7 +72,7 @@ void global_tree_clear() {
 
 void global_tree_destroy() {
     if (global_tree != NULL) {
-        os_tree_destroy(global_tree);
+        os_destroy(global_tree);
     }
 }
 
@@ -86,10 +88,8 @@ static void print_greeting() {
 
 
 int app_start(error_s *error) {
-
     print_greeting();
     console(error);
     global_tree_destroy();
-    global_tree = NULL;
     return 0;
 }

@@ -32,11 +32,11 @@ typedef struct user_command user_command;
 
 user_command *new_user_command(void callback(user_command *, error_s *), void *arg);
 
-void *user_command_get_callback(user_command *command);
+void *user_command_callback(user_command *command);
 
 void user_command_set_callback(user_command *command, void callback(user_command *, error_s *));
 
-void *user_command_get_arg(user_command *command);
+void *user_command_arg(user_command *command);
 
 void user_command_set_arg(user_command *command, void *arg);
 
