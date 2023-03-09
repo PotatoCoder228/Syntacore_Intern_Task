@@ -444,6 +444,9 @@ os_tree_s *os_select(os_tree_s *x, size_t i) {
 }
 
 size_t os_rank(os_tree_s *root, os_tree_s *x) {
+    if (os_node_is_empty(x)) {
+        return 0;
+    }
     size_t r = x->left->size + 1;
     os_tree_s *y = x;
     while (y != root) {
@@ -472,7 +475,9 @@ size_t os_find_less_than(os_tree_s *root, int64_t num) {
                     } else if (node->p->key < num) {
                         node = node->p;
                     }
-                    printf("%ld ", node->key);
+                    if (node->key > num) {
+                        return 0;
+                    }
                     return os_rank(root, node);
                 }
                 node = node->left;
@@ -484,20 +489,25 @@ size_t os_find_less_than(os_tree_s *root, int64_t num) {
                     if (node->key < num) {
                         return os_rank(root, node);
                     }
-                    if (node->left->key < num) {
+                    if (node->left->key < num && !os_node_is_empty(node->left)) {
                         node = node->left;
                     } else if (node->p->key < num) {
                         node = node->p;
                     }
-                    printf("%ld ", node->key);
+                    if (node->key > num) {
+                        return 0;
+                    }
                     return os_rank(root, node);
                 }
                 node = node->right;
             }
         }
-        printf("%ld ", node->key);
+        if (node->key > num) {
+            return 0;
+        }
         return os_rank(root, node) - 1;
     }
+
     return 0;
 }
 

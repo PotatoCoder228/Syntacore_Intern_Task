@@ -91,12 +91,26 @@ void n_command(user_command *command, error_s *error) {
             return;
         }
         if (global_tree_is_init()) {
-            printf("Количество чисел, меньших, чем %ld: %ld\n", key, global_tree_counts_less_than(key));
+            printf("Количество чисел, меньших, чем %ld: %zu\n", key, global_tree_counts_less_than(key));
         } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
     } else {
         throw_exception(error, NULL_PTR_ERROR, "n_command: передан NULL указатель.");
+    }
+}
+
+static void write_test_answer(error_s *error) {
+    FILE *file = open_file("tree_values.txt", W, error);
+    if (file != NULL) {
+        global_tree_inorder_print(file);
+        for (int i = 1; i < global_tree_get_size(); i++) {
+            fprintf(file, "%ld ", global_tree_k_stat(i));
+        }
+        for (int i = 0; i < global_tree_get_size(); i++) {
+            fprintf(file, "%ld ", global_tree_counts_less_than(i));
+        }
+        fclose(file);
     }
 }
 
@@ -158,7 +172,7 @@ void script_command(user_command *command, error_s *error) {
                 run_command(vector_get(coms, j), error);
             }
         } else {
-            for (size_t j = 0; j < vector_size(coms); j++) {
+            for (size_t j = 0; j <= vector_size(coms); j++) {
                 rb_delete(&commands_tree, vector_get(coms, j));
             }
         }
@@ -166,8 +180,10 @@ void script_command(user_command *command, error_s *error) {
         string_builder_destroy(file_line);
     }
     close_file(file, error);
+    write_test_answer(error);
     string_builder_destroy(arg);
-    printf("Выполнения из файла завершено...\n");
+    printf("\nТекущий размер дерева %ld\n", global_tree_get_size());
+    printf("\nВыполнения из файла завершено...\n");
 }
 
 void m_command(user_command *command, error_s *error) {
@@ -179,7 +195,7 @@ void m_command(user_command *command, error_s *error) {
             return;
         }
         if (global_tree_is_init()) {
-            printf("%ld-ый наименьший элемент: %ld \n", key, global_tree_k_stat(key));
+            printf("%ld-ый элемент: %ld \n", key, global_tree_k_stat(key));
         } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
