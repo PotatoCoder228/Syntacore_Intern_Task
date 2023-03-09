@@ -71,6 +71,9 @@ bool os_node_is_empty(os_tree_s *root) {
     return (root == NULL || root == EMPTY_TREE_NODE);
 }
 
+/*
+ * Деструктор
+ * */
 
 void os_destroy(void *node) {
     if (!os_node_is_empty(node)) {
@@ -504,4 +507,27 @@ void os_inorder_print(FILE *stream, os_tree_s *node) {
         fprintf(stream, "%ld ", node->key);
         os_inorder_print(stream, node->right);
     }
+}
+
+/*
+ * Реализация итератора
+ */
+
+os_tree_s *os_start(os_tree_s *root) {
+    return os_min(root);
+}
+
+bool os_has_next(os_tree_s *node) {
+    if (!os_node_is_empty(os_successor(node))) {
+        return true;
+    }
+    return false;
+}
+
+os_tree_s *os_next(os_tree_s *node) {
+    return os_successor(node);
+}
+
+os_tree_s *os_end(os_tree_s *root) {
+    return os_max(root);
 }

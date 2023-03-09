@@ -28,10 +28,11 @@ void print_log(FILE *stream, char *info) {
 
 
 static void os_tree_test() {
-    print_log(stdout, "Старт теста на вставку и удаление из  OS-дерева.");
+    print_log(stdout, "Старт теста на вставку и удаление из OS-дерева.");
     print_log(stdout, "P.S. для диагностики утечек памяти - запустите тест с помощью valgrind");
     print_log(stdout, "Инициализируем дерево...");
     os_tree_s *tree = new_os_tree(100);
+    os_delete(&tree, tree);
     if (tree == NULL) {
         print_log(stderr, "Не удалось выделить память под дерево.");
         print_log(stderr, "Тест провален.");
@@ -41,28 +42,39 @@ static void os_tree_test() {
     os_tree_s *found_node;
     print_log(stdout, "Вставляем 1000000 элементов от 0 до 999999");
     for (int i = 0; i < 1000000; i++) {
-        os_tree_insert(&tree, new_os_tree_node(i));
+        os_insert(&tree, new_os_tree_node(i));
     }
     print_log(stdout, "Проверяем поля size...");
     for (int64_t i = 0; i < 1000000; i++) {
-        found_node = os_tree_search(tree, i);
-        if (os_tree_get_size(found_node) !=
-            (os_tree_get_size(os_tree_get_right(found_node)) + os_tree_get_size(os_tree_get_left(found_node)) + 1)) {
+        found_node = os_search(tree, i);
+        if (os_size(found_node) !=
+            (os_size(os_right(found_node)) + os_size(os_left(found_node)) + 1)) {
             print_log(stderr, "Проверка size провалилась...");
             exit(0);
         }
     }
     print_log(stdout, "Поля size заданы корректно...");
+    os_tree_s *iter = os_start(tree);
+    print_log(stdout, "Тестируем итерацию...");
+    for (int64_t i = 0; os_has_next(iter) != false; i++) {
+        if (os_key(iter) != i) {
+            print_log(stderr, "Тест итератора провалился.");
+            printf("%ld, i: %ld\n", os_key(iter), i);
+            exit(0);
+        }
+        iter = os_next(iter);
+    }
+    print_log(stdout, "Тест итератора прошёл успешно.");
     print_log(stdout, "Последовательно ищем элементы от 0 до 999999 и удаляем...");
     for (int i = 0; i < 1000000; i++) {
-        found_node = os_tree_search(tree, i);
-        if (os_tree_node_is_empty(found_node)) {
+        found_node = os_search(tree, i);
+        if (os_node_is_empty(found_node)) {
             print_log(stderr, "Вставка и поиск по дереву завершились неудачей.");
             exit(0);
         }
-        os_tree_delete(&tree, found_node);
+        os_delete(&tree, found_node);
     }
-    os_tree_destroy(tree);
+    os_destroy(tree);
     print_log(stdout, "Тест успешно пройден.");
 }
 
