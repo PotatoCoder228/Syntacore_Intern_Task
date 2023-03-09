@@ -24,7 +24,7 @@ user_command *new_user_command(void callback(user_command *, error_s *), void *a
     return command;
 }
 
-void *user_command_get_callback(user_command *command) {
+void *user_command_callback(user_command *command) {
     if (command != NULL) {
         return command->callback;
     }
@@ -37,7 +37,7 @@ void user_command_set_callback(user_command *command, void callback(user_command
     }
 }
 
-void *user_command_get_arg(user_command *command) {
+void *user_command_arg(user_command *command) {
     if (command != NULL) {
         return command->arg;
     }
@@ -77,6 +77,8 @@ void k_command(user_command *command, error_s *error) {
             global_tree_insert(key);
         }
         printf("Число %ld успешно вставлено.\n", key);
+    } else {
+        throw_exception(error, NULL_PTR_ERROR, "k_command: передан NULL указатель.");
     }
 }
 
@@ -93,6 +95,8 @@ void n_command(user_command *command, error_s *error) {
         } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
+    } else {
+        throw_exception(error, NULL_PTR_ERROR, "n_command: передан NULL указатель.");
     }
 }
 
@@ -106,6 +110,7 @@ void script_command(user_command *command, error_s *error) {
     FILE *file = open_file(string_builder_get_string(arg), R, error);
     if (file == NULL) {
         string_builder_destroy(arg);
+        printf("Не удалось открыть файл...\n");
         return;
     }
     printf("Идёт выполнение из файла...\n");
@@ -118,7 +123,7 @@ void script_command(user_command *command, error_s *error) {
             break;
         }
         vector_s *coms = new_vector();
-        for (size_t i = 0; i < vector_get_size(tokens); i += 2) {
+        for (size_t i = 0; i < vector_size(tokens); i += 2) {
             user_command *com = parse_and_set_tree_command(tokens, i);
             if (com == NULL) {
                 printf("Некорректная команда.\n");
@@ -127,7 +132,7 @@ void script_command(user_command *command, error_s *error) {
                 commands_tree = NULL;
                 break;
             }
-            if (user_command_get_callback(com) == k_command) {
+            if (user_command_callback(com) == k_command) {
                 object_s *key = (void *) com;
                 //rb_tree_print(commands_tree, user_command_to_string,0);
                 rb_tree_s *buf = rb_search(commands_tree, key, command_char_arg_compare);
@@ -149,20 +154,20 @@ void script_command(user_command *command, error_s *error) {
             }
         }
         if (commands_tree != NULL) {
-            for (size_t j = 0; j < vector_get_size(coms); j++) {
+            for (size_t j = 0; j < vector_size(coms); j++) {
                 run_command(vector_get(coms, j), error);
             }
         } else {
-            for (size_t j = 0; j < vector_get_size(coms); j++) {
+            for (size_t j = 0; j < vector_size(coms); j++) {
                 rb_delete(&commands_tree, vector_get(coms, j));
             }
         }
-        //rb_tree_print(commands_tree, user_command_to_string,0);
         free(tokens);
         string_builder_destroy(file_line);
     }
     close_file(file, error);
     string_builder_destroy(arg);
+    printf("Выполнения из файла завершено...\n");
 }
 
 void m_command(user_command *command, error_s *error) {
@@ -174,10 +179,12 @@ void m_command(user_command *command, error_s *error) {
             return;
         }
         if (global_tree_is_init()) {
-            printf("%ld-ый наименьший элемент: %ld\n", key, global_tree_k_stat(key));
+            printf("%ld-ый наименьший элемент: %ld \n", key, global_tree_k_stat(key));
         } else {
             printf("Дерево не инициализировано. Элементы отсутствуют.\n");
         }
+    } else {
+        throw_exception(error, NULL_PTR_ERROR, "m_command: передан NULL указатель.");
     }
 }
 

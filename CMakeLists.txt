@@ -22,4 +22,4 @@ add_executable(Syntacore_Tools_Intern_Task
         src/string/string_builder.c
         include/string/string_builder.h
         src/io/io_handler.c
-        include/io/io_handler.h src/tests/os_tree_test.c)
+        include/io/io_handler.h)

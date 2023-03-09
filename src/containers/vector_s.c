@@ -33,21 +33,21 @@ bool vector_resize(vector_s *vector, size_t capacity) {
     return false;
 }
 
-object_s *vector_get_objects(vector_s *vector) {
+object_s *vector_objects(vector_s *vector) {
     if (vector != NULL) {
         return vector->objects;
     }
     return NULL;
 }
 
-size_t vector_get_size(vector_s *vector) {
+size_t vector_size(vector_s *vector) {
     if (vector != NULL) {
         return vector->size;
     }
     return 0;
 }
 
-size_t vector_get_capacity(vector_s *vector) {
+size_t vector_capacity(vector_s *vector) {
     if (vector != NULL) {
         return vector->capacity;
     }
@@ -127,7 +127,11 @@ bool vector_delete(vector_s *vector, size_t index, void (*destroy)(void *)) {
 }
 
 void vector_foreach(vector_s *vector, callback f) {
-    for (int i = 0; i < vector_get_size(vector); i++) f(vector_get(vector, i));
+    for (int i = 0; i < vector_size(vector); i++) f(vector_get(vector, i));
+}
+
+void vector_foreach_free(vector_s *vector, void (destroy)(void *)) {
+    for (int i = 0; i < vector_size(vector); i++) destroy(vector_get(vector, i));
 }
 
 void vector_destroy(vector_s *vector, void (*destroyer)(void *)) {
