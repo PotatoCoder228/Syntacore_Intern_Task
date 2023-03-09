@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "../../include/containers/containers.h"
 
-static char *get_format_time_now() {
+static char *format_time_now() {
     time_t now = time(0);
     char *time = ctime(&now);
     char *result_time = malloc(sizeof(char) * 27);
@@ -22,8 +22,9 @@ static char *get_format_time_now() {
 }
 
 void print_log(FILE *stream, char *info) {
-    char *time = get_format_time_now();
+    char *time = format_time_now();
     fprintf(stream, "%s%s%s%s%s", "\n", time, "[", info, "]\n");
+    free(time);
 }
 
 

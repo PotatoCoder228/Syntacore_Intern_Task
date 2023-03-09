@@ -26,6 +26,10 @@ void global_tree_clear();
 
 void global_tree_delete(int64_t num);
 
+void global_tree_inorder_print(FILE *stream);
+
+size_t global_tree_get_size();
+
 bool global_tree_is_init();
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_APP_H

@@ -16,6 +16,10 @@ bool global_tree_is_init() {
     return false;
 }
 
+size_t global_tree_get_size() {
+    return os_size(global_tree);
+}
+
 bool global_tree_init(int64_t key) {
     global_tree = new_os_tree(key);
     if (global_tree) {
@@ -37,6 +41,10 @@ void global_tree_print() {
     os_print(global_tree, 0);
     printf("Элементы в порядке возрастания:\n");
     os_inorder_print(stdout, global_tree);
+}
+
+void global_tree_inorder_print(FILE *stream) {
+    os_inorder_print(stream, global_tree);
 }
 
 int64_t global_tree_k_stat(size_t i) {
