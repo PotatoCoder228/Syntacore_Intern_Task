@@ -81,7 +81,8 @@ vector_s *string_builder_get_tokens(string_builder *string, char *sep) {
     while (buf != NULL) {
         token = new_string_builder();
         if (token == NULL) {
-            vector_destroy(result, string_builder_destroy);
+            vector_foreach_free(result, string_builder_destroy);
+            vector_destroy(result);
             return NULL;
         }
         string_builder_set_string(token, buf);

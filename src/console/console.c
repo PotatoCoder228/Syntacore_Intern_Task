@@ -121,7 +121,8 @@ bool console(error_s *error) {
             user_command *command = get_user_command_from_vector(tokens_vector);
             if (user_command_callback(command) == exit_command) {
                 run_command(command, error);
-                vector_destroy(tokens_vector, string_builder_destroy);
+                vector_foreach_free(tokens_vector, string_builder_destroy);
+                vector_destroy(tokens_vector);
                 string_builder_destroy(line);
                 break;
             } else if (user_command_callback(command) == k_command) {

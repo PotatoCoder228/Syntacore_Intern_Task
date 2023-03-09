@@ -37,7 +37,7 @@ void vector_foreach(vector_s *vector, callback f);
 
 void vector_foreach_free(vector_s *vector, void (destroy)(void *));
 
-void vector_destroy(vector_s *vector, void (*destroyer)(void *));
+void vector_destroy(vector_s *vector);
 
 void vector_print(FILE *stream, vector_s *vector, int (printer)(FILE *, char *mode, void *));
 

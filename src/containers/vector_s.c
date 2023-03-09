@@ -134,7 +134,7 @@ void vector_foreach_free(vector_s *vector, void (destroy)(void *)) {
     for (int i = 0; i < vector_size(vector); i++) destroy(vector_get(vector, i));
 }
 
-void vector_destroy(vector_s *vector, void (*destroyer)(void *)) {
+void vector_destroy(vector_s *vector) {
     free(vector->objects);
     free(vector);
 }
