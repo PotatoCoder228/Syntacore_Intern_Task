@@ -41,7 +41,7 @@
 
 Клонирование репозитория в текущую директорию:
 
-***git clone https://github.com/PotatoCoder228/Syntacore_Tools_Intern_Task.git***
+***git clone https://github.com/PotatoCoder228/Syntacore_Intern_Task.git***
 
 Для компиляции можно воспользоваться написанным **Makefile**, лежащим в
 репозитории
