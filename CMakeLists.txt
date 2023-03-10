@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(Syntacore_Tools_Intern_Task)
+project(Syntacore_Intern_Task)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Syntacore_Tools_Intern_Task
+add_executable(Syntacore_Intern_Task
         src/main.c
         src/command/command.c src/console/console.c
         include/console/console.h src/containers/os_tree_s.c
