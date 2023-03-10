@@ -84,5 +84,9 @@ os_tree_s *os_next(os_tree_s *node);
 
 os_tree_s *os_end(os_tree_s *root);
 
+os_tree_s *os_prev(os_tree_s *node);
+
+bool os_has_prev(os_tree_s *node);
+
 
 #endif //SYNTACORE_TOOLS_INTERN_TASK_OS_TREE_S_H

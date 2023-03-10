@@ -401,3 +401,33 @@ void rb_foreach_free(rb_tree_s *node, void (func)(void *)) {
         free(node->key);
     }
 }
+
+rb_tree_s *rb_start(rb_tree_s *root) {
+    return rb_min(root);
+}
+
+bool rb_has_next(rb_tree_s *node) {
+    if (!rb_is_empty(rb_successor(node))) {
+        return true;
+    }
+    return false;
+}
+
+bool rb_has_prev(rb_tree_s *node) {
+    if (!rb_is_empty(rb_predecessor(node))) {
+        return true;
+    }
+    return false;
+}
+
+rb_tree_s *rb_prev(rb_tree_s *node) {
+    return rb_predecessor(node);
+}
+
+rb_tree_s *rb_next(rb_tree_s *node) {
+    return rb_successor(node);
+}
+
+rb_tree_s *rb_end(rb_tree_s *root) {
+    return rb_max(root);
+}

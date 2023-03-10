@@ -534,6 +534,17 @@ bool os_has_next(os_tree_s *node) {
     return false;
 }
 
+bool os_has_prev(os_tree_s *node) {
+    if (!os_node_is_empty(os_predecessor(node))) {
+        return true;
+    }
+    return false;
+}
+
+os_tree_s *os_prev(os_tree_s *node) {
+    return os_predecessor(node);
+}
+
 os_tree_s *os_next(os_tree_s *node) {
     return os_successor(node);
 }

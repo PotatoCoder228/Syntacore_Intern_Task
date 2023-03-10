@@ -65,6 +65,14 @@ static void os_tree_test() {
         }
         iter = os_next(iter);
     }
+    for (int64_t i = 999999; os_has_prev(iter) != false; i--) {
+        if (os_key(iter) != i) {
+            print_log(stderr, "Тест итератора провалился на обратном проходе.");
+            printf("%ld, i: %ld\n", os_key(iter), i);
+            exit(0);
+        }
+        iter = os_prev(iter);
+    }
     print_log(stdout, "Тест итератора прошёл успешно.");
     print_log(stdout, "Последовательно ищем элементы от 0 до 999999 и удаляем...");
     for (int i = 0; i < 1000000; i++) {

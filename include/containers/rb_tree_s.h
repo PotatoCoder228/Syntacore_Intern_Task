@@ -60,4 +60,16 @@ bool rb_delete(rb_tree_s **root, rb_tree_s *z);
 
 void rb_foreach_free(rb_tree_s *node, void (func)(void *));
 
+rb_tree_s *rb_start(rb_tree_s *root);
+
+bool rb_has_next(rb_tree_s *node);
+
+bool rb_has_prev(rb_tree_s *node);
+
+rb_tree_s *rb_prev(rb_tree_s *node);
+
+rb_tree_s *rb_next(rb_tree_s *node);
+
+rb_tree_s *rb_end(rb_tree_s *root);
+
 #endif //SYNTACORE_TOOLS_INTERN_TASK_RB_TREE_S_H
